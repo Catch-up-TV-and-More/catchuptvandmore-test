@@ -16,7 +16,7 @@ import xbmcgui
 import xbmc
 
 # Package imports
-from codequick.utils import parse_qs, ensure_native_str, urlparse
+from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3
 
 script_data = xbmcaddon.Addon("script.module.codequick")
 addon_data = xbmcaddon.Addon()
@@ -61,12 +61,8 @@ class KodiLogHandler(logging.Handler):
         self.log_level_map = LoggingMap()
         self.debug_msgs = []
 
-    def emit(self, record):
-        """
-        Forward the log record to kodi, lets kodi handle the logging.
-
-        :param logging.LogRecord record: The log event record.
-        """
+    def emit(self, record):  # type: (logging.LogRecord) -> None
+        """Forward the log record to kodi, lets kodi handle the logging."""
         formatted_msg = ensure_native_str(self.format(record))
         log_level = record.levelno
 
@@ -123,26 +119,18 @@ class Route(object):
         self.callback = callback
         self.path = path
 
-    def args_to_kwargs(self, args, kwargs):
-        """
-        Convert positional arguments to keyword arguments and merge into callback parameters.
-
-        :param tuple args: List of positional arguments to extract names for.
-        :param dict kwargs: The dict of callback parameters that will be updated.
-        :returns: A list of tuples consisting of ('arg name', 'arg value)'.
-        :rtype: list
-        """
+    def args_to_kwargs(self, args, kwargs):  # type: (tuple, dict) -> None
+        """Convert positional arguments to keyword arguments and merge into callback parameters."""
         callback_args = self.arg_names()[1:]
         arg_map = zip(callback_args, args)
         kwargs.update(arg_map)
 
-    def arg_names(self):
+    def arg_names(self):  # type: () -> list
         """Return a list of argument names, positional and keyword arguments."""
-        try:
-            # noinspection PyUnresolvedReferences
+        if PY3:
             return inspect.getfullargspec(self.function).args
-        except AttributeError:
-            # "inspect.getargspec" is deprecated in python 3
+        else:
+            # noinspection PyDeprecation
             return inspect.getargspec(self.function).args
 
     def unittest_caller(self, *args, **kwargs):
@@ -235,15 +223,8 @@ class Dispatcher(object):
             self.callback_params = {key: value for key, value in self.params.items()
                                     if not (key.startswith(u"_") and key.endswith(u"_"))}
 
-    def get_route(self, path=None):
-        """
-        Return the given route object.
-
-        :param str path: The route path to fetch the route object for.
-
-        :returns: A callback route.
-        :rtype: Route
-        """
+    def get_route(self, path=None):  # type: (str) -> Route
+        """Return the given route object."""
         return self.registered_routes[path if path else self.selector]
 
     def register_callback(self, callback, parent):
@@ -358,7 +339,8 @@ def build_path(callback=None, args=None, query=None, **extra_query):
 
     # Encode the query parameters using json
     if query:
-        query = "_pickle_=" + ensure_native_str(binascii.hexlify(pickle.dumps(query, protocol=pickle.HIGHEST_PROTOCOL)))
+        pickled = binascii.hexlify(pickle.dumps(query, protocol=pickle.HIGHEST_PROTOCOL))
+        query = "_pickle_={}".format(pickled.decode("ascii") if PY3 else pickled)
 
     # Build kodi url with new path and query parameters
     return urlparse.urlunsplit(("plugin", plugin_id, route.path, query, ""))

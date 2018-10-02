@@ -26,7 +26,6 @@ SELECT_PLAYBACK_ITEM = 25006
 NO_VIDEO = 32401
 NO_DATA = 33077
 
-
 # Patterens to extract video url
 # Copied from the Youtube-DL project
 # https://github.com/rg3/youtube-dl/blob/4471affc348af40409188f133786780edd969623/youtube_dl/extractor/youtube.py#L329
@@ -65,7 +64,7 @@ class Resolver(Script):
 
     The possible return types from Resolver Callbacks are.
         * ``bytes``: URL as type "bytes".
-        * ``unicode``: URL as type "unicode".
+        * ``str``: URL as type "str".
         * ``iterable``: "List" or "tuple", consisting of URL's, "listItem's" or a "tuple" consisting of (title, URL).
         * ``dict``: "Dictionary" consisting of "title" as the key and the URL as the value.
         * ``listItem``: A :class:`codequick.Listitem<codequick.listing.Listitem>` object with required data already set e.g. "label" and "path".
@@ -102,9 +101,7 @@ class Resolver(Script):
 
         Also useful for continuous playback of videos with no foreseeable end. For example, party mode.
 
-        :param url: URL of the first playable item.
-        :type url: str or unicode
-
+        :param str url: URL of the first playable item.
         :param next_params: [opt] "Keyword" arguments to add to the loopback request when accessing the next video.
 
         :returns: The Listitem that Kodi will play.
@@ -159,8 +156,7 @@ class Resolver(Script):
             * 2 = 1080p,
             * 3 = Highest Available
 
-        :param url: URL of the video source, where the playable video can be extracted from.
-        :type url: str or unicode
+        :param str url: URL of the video source, where the playable video can be extracted from.
         :param int quality: [opt] Override YouTube.DL's quality setting.
         :param params: Optional "Keyword" arguments of YouTube.DL parameters.
 
@@ -211,7 +207,7 @@ class Resolver(Script):
             raise RuntimeError(stored_errors[0])
 
     @staticmethod
-    def extract_youtube(source):
+    def extract_youtube(source):  # pragma: no cover
         # TODO: Remove this method as soon as I found out for sure that youtube.dl works on kodi for Xbox
         import htmlement
         import urlquick
@@ -282,8 +278,7 @@ class Resolver(Script):
         Process the playlist item and add to kodi playlist.
 
         :param int count: The part number of the item
-        :param url: The resolved object
-        :type url: str or unicode
+        :param str url: The resolved object
         """
         # Kodi original listitem object
         if isinstance(url, xbmcgui.ListItem):
@@ -308,7 +303,7 @@ class Resolver(Script):
         # Populate Playlis
         self.playlist.add(listitem.getPath(), listitem)
 
-    def _process_generator(self, resolved):  # Undocumented
+    def _process_generator(self, resolved):
         """
         Populate the kodi playlist in the background from a generator.
 
@@ -317,7 +312,7 @@ class Resolver(Script):
         for item in enumerate(filter(None, resolved), 2):
             self._playlist_item(*item)
 
-    def _process_results(self, resolved):  # Undocumented
+    def _process_results(self, resolved):
         """
         Construct playable listitem and send to kodi.
 

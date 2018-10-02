@@ -11,7 +11,7 @@ import xbmcgui
 import xbmc
 
 # Package imports
-from codequick.utils import ensure_unicode, ensure_native_str, safe_path
+from codequick.utils import ensure_unicode, ensure_native_str, unicode_type, string_map
 from codequick.support import dispatcher, script_data, addon_data, logger_id
 
 __all__ = ["Script", "Settings"]
@@ -30,7 +30,7 @@ class Settings(object):
         :param str key: ID of the setting to access.
 
         :return: Setting as a "unicode string".
-        :rtype: unicode
+        :rtype: str
         """
         return addon_data.getSetting(key)
 
@@ -39,13 +39,12 @@ class Settings(object):
         Set add-on setting.
 
         :param str key: ID of the setting.
-        :param value: Value of the setting.
-        :type value: str or unicode
+        :param str value: Value of the setting.
         """
         # noinspection PyTypeChecker
         addon_data.setSetting(key, ensure_unicode(value))
 
-    def __delitem__(self, key):
+    def __delitem__(self, key):  # type: (str) -> None
         """Set an add-on setting to a blank string."""
         addon_data.setSetting(key, "")
 
@@ -60,7 +59,7 @@ class Settings(object):
         :raises RuntimeError: If ``addon_id`` is given and there is no add-on with given ID.
 
         :return: Setting as a "unicode string".
-        :rtype: unicode
+        :rtype: str
         """
         if addon_id:
             return xbmcaddon.Addon(addon_id).getSetting(key)
@@ -199,7 +198,7 @@ class Script(object):
             * :attr:`Script.ERROR<codequick.script.Script.ERROR>`
             * :attr:`Script.CRITICAL<codequick.script.Script.CRITICAL>`
 
-        :param msg: The message format string.
+        :param str msg: The message format string.
         :type args: list or tuple
         :param args: List of arguments which are merged into msg using the string formatting operator.
         :param int lvl: The logging level to use. default => 10 (Debug).
@@ -225,14 +224,9 @@ class Script(object):
             * :attr:`Script.NOTIFY_ERROR<codequick.script.Script.NOTIFY_ERROR>`
             * :attr:`Script.NOTIFY_WARNING<codequick.script.Script.NOTIFY_WARNING>`
 
-        :type heading: str or unicode
-        :param heading: Dialog heading label.
-
-        :type message: str or unicode
-        :param message: Dialog message label.
-
-        :type icon: str or unicode
-        :param icon: [opt] Icon image to use. (default => 'add-on icon image')
+        :param str heading: Dialog heading label.
+        :param str message: Dialog message label.
+        :param str icon: [opt] Icon image to use. (default => 'add-on icon image')
 
         :param int display_time: [opt] Ttime in "milliseconds" to show dialog. (default => 5000)
         :param bool sound: [opt] Whether or not to play notification sound. (default => True)
@@ -249,14 +243,35 @@ class Script(object):
     @staticmethod
     def localize(string_id):
         """
-        Returns an add-on's localized "unicode string".
+        Retruns a translated UI string from addon localization files.
 
-        :param int string_id: The ID or of the localized string
+        .. note::
+
+            :data:`utils.string_map<codequick.utils.string_map>`
+            needs to be populated before you can pass in a string as the reference.
+
+        :param string_id: The numeric ID or gettext string ID of the localized string
+        :type string_id: str or int
 
         :returns: Localized unicode string.
-        :rtype: unicode
+        :rtype: str
+
+        :raises Keyword: if a gettext string ID was given but the string is not found in English :file:`strings.po`.
+        :example:
+            >>> Script.localize(30001)
+            "Toutes les vidéos"
+            >>> Script.localize("All Videos")
+            "Toutes les vidéos"
         """
-        if 30000 <= string_id <= 30999:
+        if isinstance(string_id, (str, unicode_type)):
+            try:
+                numeric_id = string_map[string_id]
+            except KeyError:
+                raise KeyError("no localization found for string id '%s'" % string_id)
+            else:
+                return addon_data.getLocalizedString(numeric_id)
+
+        elif 30000 <= string_id <= 30999:
             return addon_data.getLocalizedString(string_id)
         elif 32000 <= string_id <= 32999:
             return script_data.getLocalizedString(string_id)
@@ -288,7 +303,7 @@ class Script(object):
         :param str addon_id: [opt] ID of another add-on to extract properties from.
 
         :return: Add-on property as a unicode string.
-        :rtype: unicode
+        :rtype: str
 
         :raises RuntimeError: If add-on ID is given and there is no add-on with given ID.
         """
@@ -307,12 +322,11 @@ class Script(object):
             resp = xbmc.translatePath(resp)
 
         # Convert response to unicode
-        resp = resp.decode("utf8") if isinstance(resp, bytes) else resp
+        path = resp.decode("utf8") if isinstance(resp, bytes) else resp
 
         # Create any missing directory
         if key.startswith("profile"):
-            path = safe_path(resp)
             if not os.path.exists(path):  # pragma: no cover
                 os.mkdir(path)
 
-        return resp
+        return path
