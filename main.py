@@ -33,6 +33,15 @@ with mock.patch('sys.argv', fake_args):
     import addon
     addon.main()
 
+    print ''
+    print '==> Current menu:'
+
+    for item in variables.CURRENT_MENU:
+        print ''
+        # print '[URL] ' + item['url']
+        print '\t[label] ' + item['listitem'].getLabel()
+        print '\t[is_folder] ' + str(item['is_folder'])
+
 
 print ''
 print 'Exit Catch-up TV & More tester'
