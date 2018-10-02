@@ -10,7 +10,7 @@ from mock_xbmcplugin import *
 from mock_xbmcgui import *
 
 
-print 'Catch-up TV & More tester'
+print 'Catch-up TV & More simulator'
 print ''
 
 # Mock Kodi Python API
@@ -26,22 +26,58 @@ sys.path.append(variables.CODEQUICK_PATH)
 # Add Catch-up TV & More module path
 sys.path.append(variables.ADDON_PATH)
 
-# Simulate Kodi argv
-fake_args = ['plugin://plugin.video.catchuptvandmore/', '1', '']
 
-with mock.patch('sys.argv', fake_args):
-    import addon
-    addon.main()
+base_url = 'plugin://plugin.video.catchuptvandmore/'
+process_handle = '1'
+query_string = ''
 
-    print ''
-    print '==> Current menu:'
 
-    for item in variables.CURRENT_MENU:
+while(True):
+    # Simulate Kodi argv
+    fake_args = [base_url, process_handle, query_string]
+
+    with mock.patch('sys.argv', fake_args):
+        import addon
+        addon.main()
+
         print ''
-        # print '[URL] ' + item['url']
-        print '\t[label] ' + item['listitem'].getLabel()
-        print '\t[is_folder] ' + str(item['is_folder'])
+        print '==> Current menu:'
+        print ''
+
+        cnt = -1
+        for item in variables.CURRENT_MENU:
+            cnt = cnt + 1
+
+            # print '[URL] ' + item['url']
+            formated_item = '\t'
+            if item['is_folder']:
+                formated_item += "* "
+            else:
+                formated_item += "- "
+
+            formated_item += item['listitem'].getLabel()
+            formated_item += ' [' + str(cnt) + ']'
+            print formated_item
+
+        print ''
+        print 'Enter -1 to exit simulator'
+        print ''
+
+        try:
+            next_item = int(raw_input('Item to select? \n'))
+            if int(next_item) == -1:
+                break
+
+            else:
+                next_item_splited = variables.CURRENT_MENU[int(next_item)]['url'].split('?')
+                base_url = next_item_splited[0]
+                query_string = '?' + next_item_splited[1]
+        except ValueError:
+            pass
+
+        # Clear previous menu
+        variables.CURRENT_MENU = []
 
 
 print ''
-print 'Exit Catch-up TV & More tester'
+print 'Exit Catch-up TV & More simulator'

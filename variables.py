@@ -24,14 +24,17 @@ FAKE_SETTINGS = {
     'replay': 'true',
     "replay.order": '2',
     'websites': 'true',
-    'websites.order': '3'
+    'websites.order': '3',
+    'fr_replay': 'true',
+    'fr_replay.order': '1'
 }
 
 # TO ADAPT
 FAKE_LABELS = {
     30030: 'TV en direct',
     30031: 'Replay TV',
-    30032: 'Sites internet'
+    30032: 'Sites internet',
+    30050: 'France'
 }
 
 
