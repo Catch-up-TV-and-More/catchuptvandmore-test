@@ -11,32 +11,40 @@ class FakeAddon(object):
         self._labels = variables.FAKE_LABELS
 
     def getAddonInfo(self, info_id):
+        result = ''
         if info_id == 'id':
-            return self._id
+            result = self._id
         elif info_id == 'name':
-            return 'Catch-up TV & More'
+            result = 'Catch-up TV & More'
         elif info_id == 'path':
-            return variables.ADDON_PATH
+            result = variables.ADDON_PATH
         elif info_id == 'fanart':
-            return variables.ADDON_FANART_PATHFILE
+            result = variables.ADDON_FANART_PATHFILE
         elif info_id == 'icon':
-            return variables.ADDON_ICON_PATHFILE
+            result = variables.ADDON_ICON_PATHFILE
         elif info_id == 'profile':
-            return variables.CONFIG_PATH
+            result = variables.CONFIG_PATH
         else:
             raise Exception(
                 'Need to complete getAddonInfo mock for info_id: ' + info_id)
 
+        if variables.ENABLE_MOCK_XBMCADDON_LOG:
+            print '[FakeAddon] getAddonInfo of "' + info_id + '" --> "' + result + '"'
+        return result
+
     def getSetting(self, setting_id):
-        print '[FakeAddon] getSetting of "' + setting_id + '" --> "' + self._settings.get(setting_id, '') + '"'
+        if variables.ENABLE_MOCK_XBMCADDON_LOG:
+            print '[FakeAddon] getSetting of "' + setting_id + '" --> "' + self._settings.get(setting_id, '') + '"'
         return self._settings.get(setting_id, '')
 
     def setSetting(self, _id, value):
-        print '[FakeAddon] setSetting of "' + _id + '" --> "' + value + '"'
+        if variables.ENABLE_MOCK_XBMCADDON_LOG:
+            print '[FakeAddon] setSetting of "' + _id + '" --> "' + value + '"'
         self._settings[_id] = value
 
     def getLocalizedString(self, id_):
-        print '[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_, str(id_)) + '"'
+        if variables.ENABLE_MOCK_XBMCADDON_LOG:
+            print '[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_, str(id_)) + '"'
         return self._labels.get(id_, str(id_))
 
 

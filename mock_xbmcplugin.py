@@ -5,12 +5,14 @@ import variables
 
 
 def fake_add_directory_items(handle, items, totalItems=0):
+    variables.MENUS[variables.CURRENT_LEVEL] = []
     for item in items:
         current_item = {}
         current_item['url'] = item[0]
         current_item['listitem'] = item[1]
         current_item['is_folder'] = item[2]
-        variables.CURRENT_MENU.append(current_item)
+
+        variables.MENUS[variables.CURRENT_LEVEL].append(current_item)
     return True
 
 

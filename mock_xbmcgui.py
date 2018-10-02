@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import mock
-
+import variables
 
 class FakeListItem(object):
     def __init__(self, label="", label2="", iconImage="", thumbnailImage="", path=""):
@@ -55,7 +55,12 @@ def print_formated_listitem(listitem, is_folder, cnt):
 
     print formated_item
 
+    if variables.ONLY_LIST_ITEM_LABEL:
+        return
+
     if listitem._art:
         for art_item_k, art_item_v in listitem._art.iteritems():
             print '    - [' + art_item_k + '] = ' + art_item_v
+
+    print ''
 

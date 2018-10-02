@@ -2,7 +2,26 @@
 # -*- coding: utf-8 -*-
 import os
 
-CURRENT_MENU = []
+KODI_URLS = {}
+MENUS = {}
+CURRENT_LEVEL = 0
+
+
+# TO ADAPT
+ENABLE_FAKE_KODI_LOG = False
+ENABLE_MOCK_XBMCADDON_LOG = False
+
+# TO ADAPT
+ONLY_LIST_ITEM_LABEL = True
+
+# TO ADAPT
+# Pour passer directement plusieurs
+# menu d'un seul coup sans avoir à le faire à la main
+USE_AUTO_SELECT = False
+AUTO_SELECT = {
+    1: 2,  # Au niveau 1, choisir l'item numéro 2 (Replay TV)
+    2: 1  # Au niveau 2, choisi l'item numéro 1 (France)
+}
 
 # TO ADAPT
 ADDON_ID = "plugin.video.catchuptvandmore"
