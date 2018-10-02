@@ -47,17 +47,9 @@ while(True):
         cnt = -1
         for item in variables.CURRENT_MENU:
             cnt = cnt + 1
-
+            print_formated_listitem(item['listitem'], item['is_folder'], cnt)
+            print ''
             # print '[URL] ' + item['url']
-            formated_item = '\t'
-            if item['is_folder']:
-                formated_item += "* "
-            else:
-                formated_item += "- "
-
-            formated_item += item['listitem'].getLabel()
-            formated_item += ' [' + str(cnt) + ']'
-            print formated_item
 
         print ''
         print 'Enter -1 to exit simulator'

@@ -35,7 +35,27 @@ class FakeListItem(object):
     def setArt(self, art):
         self._art = art
 
+    def getArt(self, key):
+        return self._art.get(key, '')
 
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.ListItem.side_effect = FakeListItem
+
+
+def print_formated_listitem(listitem, is_folder, cnt):
+    formated_item = ''
+    if is_folder:
+        formated_item += "* "
+    else:
+        formated_item += "- "
+
+    formated_item += listitem.getLabel()
+    formated_item += ' [' + str(cnt) + ']'
+
+    print formated_item
+
+    if listitem._art:
+        for art_item_k, art_item_v in listitem._art.iteritems():
+            print '    - [' + art_item_k + '] = ' + art_item_v
+
