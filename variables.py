@@ -29,5 +29,10 @@ FAKE_SETTINGS = {
 
 # TO ADAPT
 FAKE_LABELS = {
-
+    30030: 'Live TV',
+    30031: 'Replay TV',
+    30032: 'Sites internets'
 }
+
+
+CURRENT_MENU = []
