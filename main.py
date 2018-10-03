@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import sys
 import mock
+import importlib
+import subprocess
+
 
 import config
 import common
@@ -54,7 +57,21 @@ while(True):
 
     with mock.patch('sys.argv', fake_args):
 
+        for k, v in sys.modules.items():
+            if 'plugin.video.catchuptvandmore' in str(v):
+                importlib.reload(v)
+
+        importlib.reload(addon)
+
         addon.main()
+
+        if runtime.VIDEO_URL_TO_PLAY:
+            p = subprocess.Popen("mpv " + runtime.VIDEO_URL_TO_PLAY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            (output, err) = p.communicate()
+            retval = p.wait()
+            runtime.VIDEO_URL_TO_PLAY = ""
+            runtime.LISTINGS_STACK.pop()
+            continue
 
         print('')
         print('==> Current menu:')
@@ -67,8 +84,7 @@ while(True):
         items = runtime.CURRENT_MENU['items']
         for item in items:
             cnt += 1
-            print_formated_listitem(item['listitem'], item['is_folder'], cnt)
-            # print '[URL] ' + item['url']
+            print_formated_listitem(item['listitem'], item['is_folder'], cnt, item['url'])
 
         print('')
 

@@ -16,7 +16,11 @@ You need to configure the AUTO_SELECT dict
 ENABLE_AUTO_SELECT = True
 AUTO_SELECT = {
     0: 2,  # At level 0, choose item number 2 (Replay TV)
-    1: 1  # At level 1, choose item number 1 (France)
+    1: 1,  # At level 1, choose item number 1 (France)
+    2: 1,
+    3: 2,
+    4: 1,
+    5: 4
 }
 
 
@@ -37,7 +41,7 @@ ENABLE_MOCK_XBMCADDON_LOG = True
 """
 When set to True, only the label of the items is printed
 """
-ONLY_PRINT_ITEM_LABEL = False
+ONLY_PRINT_ITEM_LABEL = True
 
 
 """
@@ -59,7 +63,10 @@ FAKE_SETTINGS = {
 
     # Replay menu fr
     'tf1': 'true',
-    'tf1.order': '1'
+    'tf1.order': '1',
+
+    # Other
+    'quality': 'BEST'
 }
 
 

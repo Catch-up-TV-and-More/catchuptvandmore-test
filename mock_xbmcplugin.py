@@ -20,10 +20,17 @@ def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDi
     pass
 
 
+def fake_set_resolve_url(handle, succeeded, listitem):
+    if listitem._path:
+        print('[path] = ' + listitem._path)
+        runtime.VIDEO_URL_TO_PLAY = listitem._path
+
+
 mock_xbmcplugin = mock.MagicMock()
 
 mock_xbmcplugin.addDirectoryItems.side_effect = fake_add_directory_items
 mock_xbmcplugin.endOfDirectory.side_effect = fake_end_of_directory
+mock_xbmcplugin.setResolvedUrl.side_effect = fake_set_resolve_url
 
 # Say to Python that the xbmcplugin module is mock_xbmcplugin
 sys.modules['xbmcplugin'] = mock_xbmcplugin

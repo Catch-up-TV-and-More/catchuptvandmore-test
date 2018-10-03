@@ -26,3 +26,6 @@ concerning the current menu that Kodi is building
 CURRENT_MENU = {
     'items': []
 }
+
+
+VIDEO_URL_TO_PLAY = ""
