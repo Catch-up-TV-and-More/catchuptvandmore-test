@@ -1,18 +1,18 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 import mock
-import variables
+import runtime
 
 
 def fake_add_directory_items(handle, items, totalItems=0):
-    variables.MENUS[variables.CURRENT_LEVEL] = []
+    runtime.CURRENT_MENU['items'] = []
     for item in items:
         current_item = {}
         current_item['url'] = item[0]
         current_item['listitem'] = item[1]
         current_item['is_folder'] = item[2]
 
-        variables.MENUS[variables.CURRENT_LEVEL].append(current_item)
+        runtime.CURRENT_MENU['items'].append(current_item)
     return True
 
 
@@ -21,5 +21,9 @@ def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDi
 
 
 mock_xbmcplugin = mock.MagicMock()
+
 mock_xbmcplugin.addDirectoryItems.side_effect = fake_add_directory_items
 mock_xbmcplugin.endOfDirectory.side_effect = fake_end_of_directory
+
+# Say to Python that the xbmcplugin module is mock_xbmcplugin
+sys.modules['xbmcplugin'] = mock_xbmcplugin

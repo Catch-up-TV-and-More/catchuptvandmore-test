@@ -1,0 +1,14 @@
+{
+    "body":"",
+    "status":301,
+    "strict":true,
+    "headers":{
+        "date":"Tue, 02 Oct 2018 22:36:29 GMT",
+        "connection":"keep-alive",
+        "location":"https://www.tf1.fr/tf1/programmes-tv",
+        "content-length":"0",
+        "server":"AkamaiGHost"
+    },
+    "reason":"Moved Permanently",
+    "version":11
+}

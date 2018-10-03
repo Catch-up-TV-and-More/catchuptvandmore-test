@@ -1,7 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 import mock
-import variables
+import config
 
 LOGDEBUG = 0
 LOGERROR = 4
@@ -14,8 +14,8 @@ LOGWARNING = 3
 
 
 def fake_log(msg, level=LOGDEBUG):
-    if variables.ENABLE_FAKE_KODI_LOG:
-        print '[FakeKodiLog] (level: ' + str(level) + ')' + msg
+    if config.ENABLE_FAKE_KODI_LOG:
+        print('[FakeKodiLog level ' + str(level) + '] ' + msg)
 
 
 def fake_translate_path(path):
@@ -23,7 +23,9 @@ def fake_translate_path(path):
 
 
 mock_xbmc = mock.MagicMock()
+
 mock_xbmc.log.side_effect = fake_log
+
 mock_xbmc.LOGDEBUG = LOGDEBUG
 mock_xbmc.LOGERROR = LOGERROR
 mock_xbmc.LOGFATAL = LOGFATAL
@@ -34,3 +36,6 @@ mock_xbmc.LOGSEVERE = LOGSEVERE
 mock_xbmc.LOGWARNING = LOGWARNING
 
 mock_xbmc.translatePath.side_effect = fake_translate_path
+
+# Say to Python that the xbmc module is mock_xbmc
+sys.modules['xbmc'] = mock_xbmc

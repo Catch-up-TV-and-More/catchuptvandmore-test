@@ -1,44 +1,50 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
 
-KODI_URLS = {}
-MENUS = {}
-CURRENT_LEVEL = 0
+# Here you can customize your simulator behavior and your personal configuration
+
+"""
+You need to set your Catch-up TV & More folder path
+"""
+ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up TV & More', 'plugin.video.catchuptvandmore')
 
 
-# TO ADAPT
-ENABLE_FAKE_KODI_LOG = False
-ENABLE_MOCK_XBMCADDON_LOG = False
-
-# TO ADAPT
-ONLY_LIST_ITEM_LABEL = True
-
-# TO ADAPT
-# Pour passer directement plusieurs
-# menu d'un seul coup sans avoir à le faire à la main
-USE_AUTO_SELECT = False
+"""
+When set to True we are in "auto" explore mode
+You need to configure the AUTO_SELECT dict
+"""
+ENABLE_AUTO_SELECT = True
 AUTO_SELECT = {
-    1: 2,  # Au niveau 1, choisir l'item numéro 2 (Replay TV)
-    2: 1  # Au niveau 2, choisi l'item numéro 1 (France)
+    0: 2,  # At level 0, choose item number 2 (Replay TV)
+    1: 1  # At level 1, choose item number 1 (France)
 }
 
-# TO ADAPT
-ADDON_ID = "plugin.video.catchuptvandmore"
+
+"""
+When set to True, you can see the messages
+normally send to Kodi log by CodeQuick or by your plugin
+"""
+ENABLE_FAKE_KODI_LOG = True
 
 
-CWD_PATH = os.path.dirname(os.path.abspath(__file__))
-CODEQUICK_PATH = os.path.join(CWD_PATH, 'script.module.codequick', 'lib')
+"""
+When set to True, you can see log
+message when a fake Kodi API function is called
+"""
+ENABLE_MOCK_XBMCADDON_LOG = True
 
-# TO ADAPT
-ADDON_PATH = os.path.join(CWD_PATH, '..', 'plugin.video.catchuptvandmore')
 
-ADDON_FANART_PATHFILE = os.path.join(ADDON_PATH, 'fanart.jpg')
-ADDON_ICON_PATHFILE = os.path.join(ADDON_PATH, 'icon.png')
-CONFIG_PATH = os.path.join(CWD_PATH, 'fake_config')
+"""
+When set to True, only the label of the items is printed
+"""
+ONLY_PRINT_ITEM_LABEL = False
 
-# TO ADAPT
+
+"""
+This dict simulate your settings.xml file
+"""
 FAKE_SETTINGS = {
+
     # Main menu
     'live_tv': 'true',
     'live_tv.order': '1',
@@ -56,7 +62,12 @@ FAKE_SETTINGS = {
     'tf1.order': '1'
 }
 
-# TO ADAPT
+
+"""
+You can generate this dict with this command :
+python generate_labels_dict_from_strings.po your_strings.po
+if you need to use french labels
+"""
 FAKE_LABELS = {
     30000: 'Main menu',
     30001: 'Countries',

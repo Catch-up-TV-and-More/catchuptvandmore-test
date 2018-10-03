@@ -1,7 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 import mock
-import variables
+
 
 class FakeListItem(object):
     def __init__(self, label="", label2="", iconImage="", thumbnailImage="", path=""):
@@ -42,25 +42,5 @@ class FakeListItem(object):
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.ListItem.side_effect = FakeListItem
 
-
-def print_formated_listitem(listitem, is_folder, cnt):
-    formated_item = ''
-    if is_folder:
-        formated_item += "* "
-    else:
-        formated_item += "- "
-
-    formated_item += listitem.getLabel()
-    formated_item += ' [' + str(cnt) + ']'
-
-    print formated_item
-
-    if variables.ONLY_LIST_ITEM_LABEL:
-        return
-
-    if listitem._art:
-        for art_item_k, art_item_v in listitem._art.iteritems():
-            print '    - [' + art_item_k + '] = ' + art_item_v
-
-    print ''
-
+# Say to Python that the xbmcgui module is mock_xbmcgui
+sys.modules['xbmcgui'] = mock_xbmcgui
