@@ -13,7 +13,7 @@ ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up T
 When set to True we are in "auto" explore mode
 You need to configure the AUTO_SELECT dict
 """
-ENABLE_AUTO_SELECT = True
+ENABLE_AUTO_SELECT = False
 AUTO_SELECT = {
     0: 2,  # At level 0, choose item number 2 (Replay TV)
     1: 1,  # At level 1, choose item number 1 (France)
@@ -36,6 +36,13 @@ When set to True, you can see log
 message when a fake Kodi API function is called
 """
 ENABLE_MOCK_XBMCADDON_LOG = True
+
+
+"""
+When set to True, you can see log
+message when a fake Kodi API function is called
+"""
+ENABLE_MOCK_XBMC_LOG = True
 
 
 """
@@ -185,7 +192,11 @@ FAKE_LABELS = {
     30713: 'Geo-blocked video',
     30714: 'Search videos',
     30715: 'Search programs',
-    30716: 'Video stream is not available'
+    30716: 'Video stream is not available',
+
+
+    # CodeQuick
+    33078: 'Next page'
 }
 
 

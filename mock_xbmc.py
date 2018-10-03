@@ -22,6 +22,12 @@ def fake_translate_path(path):
     return path
 
 
+def get_localized_string(id_):
+    if config.ENABLE_MOCK_XBMC_LOG:
+        print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + config.FAKE_LABELS.get(id_, str(id_)) + '"')
+    return config.FAKE_LABELS.get(id_, str(id_))
+
+
 mock_xbmc = mock.MagicMock()
 
 mock_xbmc.log.side_effect = fake_log
@@ -36,6 +42,7 @@ mock_xbmc.LOGSEVERE = LOGSEVERE
 mock_xbmc.LOGWARNING = LOGWARNING
 
 mock_xbmc.translatePath.side_effect = fake_translate_path
+mock_xbmc.getLocalizedString.side_effect = get_localized_string
 
 # Say to Python that the xbmc module is mock_xbmc
 sys.modules['xbmc'] = mock_xbmc

@@ -55,6 +55,7 @@ while(True):
     plugin_url = runtime.LISTINGS_STACK[-1]
     fake_args = [plugin_url['base_url'], plugin_url['process_handle'], plugin_url['query_string']]
 
+
     with mock.patch('sys.argv', fake_args):
 
         for k, v in sys.modules.items():
@@ -63,7 +64,11 @@ while(True):
 
         importlib.reload(addon)
 
-        addon.main()
+        try:
+            addon.main()
+        except:
+            print('COUCOUCCC')
+            exit()
 
         if runtime.VIDEO_URL_TO_PLAY:
             p = subprocess.Popen("mpv " + runtime.VIDEO_URL_TO_PLAY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -124,6 +129,7 @@ while(True):
             })
 
             runtime.CURRENT_LEVEL += 1
+
 
 
 print('')
