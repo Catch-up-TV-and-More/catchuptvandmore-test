@@ -49,6 +49,7 @@ class FakeAddon(object):
         return self._labels.get(id_, str(id_))
 
 
+
 mock_xbmcaddon = mock.MagicMock()
 
 mock_xbmcaddon.Addon.side_effect = FakeAddon

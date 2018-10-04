@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
+# HACK
+import bridge
+
 # Standard Library Imports
 import binascii
 import logging
@@ -285,6 +288,7 @@ class Dispatcher(object):
             dialog = xbmcgui.Dialog()
             dialog.notification(e.__class__.__name__, str(e), addon_data.getAddonInfo("icon"))
             logger.critical(str(e), exc_info=1)
+            bridge.LAST_MENU_TRIGGER_ERROR = True
 
         else:
             from . import start_time

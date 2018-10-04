@@ -16,6 +16,7 @@ CHECK = u'\U00002705'
 NO_CHECK = u'\U0000274C'
 RED_RING = u'\U00002B55'
 TV = u'\U0001F4FA'
+WARNING = u'\U000026A0'
 
 
 def check_image(path):

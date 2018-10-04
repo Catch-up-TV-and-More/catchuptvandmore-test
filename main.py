@@ -4,6 +4,7 @@ import sys
 import mock
 import importlib
 import subprocess
+import bridge
 
 
 import config
@@ -62,7 +63,6 @@ while(True):
                 importlib.reload(v)
 
         importlib.reload(addon)
-
         addon.main()
 
         if runtime.VIDEO_URL_TO_PLAY:
@@ -73,20 +73,13 @@ while(True):
             runtime.LISTINGS_STACK.pop()
             continue
 
-        '''
-        cnt = 0
-        if runtime.CURRENT_LEVEL > 0:
-            print('* Previous menu [0]')
-
-        items = runtime.CURRENT_MENU['items']
-        for item in items:
-            cnt += 1
-            print_formated_listitem(item['listitem'], item['is_folder'], cnt, item['url'])
-
-        print('')
-        '''
         items = runtime.CURRENT_MENU['items']
         print_formated_listing(items)
+
+        if bridge.LAST_MENU_TRIGGER_ERROR:
+            print(WARNING + ' The last selection triggered an error (see log above) ' + WARNING)
+            print('')
+            bridge.LAST_MENU_TRIGGER_ERROR = False
 
         # Now we have to know the next item to epxlore
 
