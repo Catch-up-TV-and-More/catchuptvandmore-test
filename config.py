@@ -47,8 +47,9 @@ ENABLE_MOCK_XBMC_LOG = True
 
 """
 Console size (in order to compute the collumn size)
+If you want to reduce the size of the menu array
 """
-CONSOLE_SIZE = 160
+CONSOLE_SIZE = 130
 
 
 """
