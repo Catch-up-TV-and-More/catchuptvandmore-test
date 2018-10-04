@@ -1,3 +1,6 @@
+
+.cache
+
 *.bak
 *.pyo
 *.pyc

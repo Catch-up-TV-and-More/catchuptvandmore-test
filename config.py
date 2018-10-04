@@ -46,9 +46,9 @@ ENABLE_MOCK_XBMC_LOG = True
 
 
 """
-When set to True, only the label of the items is printed
+Console size (in order to compute the collumn size)
 """
-ONLY_PRINT_ITEM_LABEL = True
+CONSOLE_SIZE = 160
 
 
 """

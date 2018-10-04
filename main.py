@@ -55,7 +55,6 @@ while(True):
     plugin_url = runtime.LISTINGS_STACK[-1]
     fake_args = [plugin_url['base_url'], plugin_url['process_handle'], plugin_url['query_string']]
 
-
     with mock.patch('sys.argv', fake_args):
 
         for k, v in sys.modules.items():
@@ -64,11 +63,7 @@ while(True):
 
         importlib.reload(addon)
 
-        try:
-            addon.main()
-        except:
-            print('COUCOUCCC')
-            exit()
+        addon.main()
 
         if runtime.VIDEO_URL_TO_PLAY:
             p = subprocess.Popen("mpv " + runtime.VIDEO_URL_TO_PLAY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -78,10 +73,7 @@ while(True):
             runtime.LISTINGS_STACK.pop()
             continue
 
-        print('')
-        print('==> Current menu:')
-        print('')
-
+        '''
         cnt = 0
         if runtime.CURRENT_LEVEL > 0:
             print('* Previous menu [0]')
@@ -92,6 +84,9 @@ while(True):
             print_formated_listitem(item['listitem'], item['is_folder'], cnt, item['url'])
 
         print('')
+        '''
+        items = runtime.CURRENT_MENU['items']
+        print_formated_listing(items)
 
         # Now we have to know the next item to epxlore
 
