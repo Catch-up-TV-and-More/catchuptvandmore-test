@@ -15,6 +15,7 @@ The purpose of this script is multiple:
 This module works without modifying the original Catch-up TV & More source code. Thereby you can develop the add-on and test it at the same time in Kodi and in your terminal with this test module.
 The different Kodi modules (xbmc, xbmcgui, xbmcaddon and xbmcplugin) are "hooked" with the aid of the mock python module.
 
+
 ## How to do?
 
 Just clone this repository, edit the `config.py` file according to your configuration and run the main file with the `python3 main.py` command.
@@ -25,6 +26,7 @@ Finally, this is my command to run the script with the STOUD and STDERR redirect
 ```bash
 python3 main.py 2>&1| tee ./log.txt
 ```
+
 
 ## Configuration file
 
@@ -57,6 +59,20 @@ This is the variables list to set with  short description:
 * **FAKE_LABELS** :
     * This dictionary corresponds to the `strings.po` file of the add-on. Maybe soon the script will be able to directly parse and use the "real" `strings.po` of the add-on. For now you can generate this dictionary with the `generate_labels_dict_from_strings.po.py` file like that: `python generate_labels_dict_from_strings.po.py path_of_string.po_file`.
 
+
+## Cheat sheet of the fake array items
+
+* General
+   * :file_folder: : This item `is_folder`
+   * :arrow_left: : Previous menu
+   * :arrow_forward: This item `is_playable`
+
+* Thumb and Fanart
+   * :earth_africa: : The image come from the web (with an URL)
+   * :desktop_computer: : The image come from the add-on resources
+   * :white_check_mark: : The image is correct (if the file is "really" an image)
+   * :x: : There is something wrong and the image is not present or not valid (incorrect path for local image or wrong URL)
+   * :tv: : This thumb or fanart is respectively the thumb or fanart of Catch-up TV & more (our official logo)
 
 
 
