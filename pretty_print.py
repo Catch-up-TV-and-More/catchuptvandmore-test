@@ -130,6 +130,8 @@ def format_item(item, cnt):
         fanart_pp = RED_RING
 
 
+
+    '''
     if listitem._label2:
         print('    - [label2] = ' + listitem._label2)
 
@@ -156,6 +158,8 @@ def format_item(item, cnt):
     if listitem._property:
         for property_item_k, property_item_v in listitem._property.items():
             print('    - [' + property_item_k + '] = ' + repr(property_item_v))
+
+    '''
 
     return {
         'key': str(cnt),
