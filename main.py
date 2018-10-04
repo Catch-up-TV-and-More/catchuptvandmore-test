@@ -78,8 +78,18 @@ while(True):
 
         if bridge.LAST_MENU_TRIGGER_ERROR:
             print(WARNING + ' The last selection triggered an error (see log above) ' + WARNING)
+            print('\tRoute that triggered the error: ' + bridge.TRIGGER_ERROR_ROUTE)
+            print('\tParams that triggered the error: ' + bridge.TRIGGER_ERROR_PARAMS)
             print('')
+
+            runtime.ALL_REPORTED_ERROR.append({
+                'route': bridge.TRIGGER_ERROR_ROUTE,
+                'params': bridge.TRIGGER_ERROR_PARAMS
+            })
+
             bridge.LAST_MENU_TRIGGER_ERROR = False
+            bridge.TRIGGER_ERROR_ROUTE = ''
+            bridge.TRIGGER_ERROR_PARAMS = ''
 
         # Now we have to know the next item to epxlore
 
@@ -119,6 +129,16 @@ while(True):
             runtime.CURRENT_LEVEL += 1
 
 
+# We want to print all encountered errors
+if runtime.ALL_REPORTED_ERROR:
+    print('')
+    print('Encountered errors list:')
+    cnt = 0
+    for error in runtime.ALL_REPORTED_ERROR:
+        print('\n\t* Error ', cnt)
+        print('\t\t- Route: ', error['route'])
+        print('\t\t- Params: ', error['params'])
+        cnt += 1
 
 print('')
 print('Exit Catch-up TV & More simulator')

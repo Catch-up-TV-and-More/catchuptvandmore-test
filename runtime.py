@@ -29,3 +29,10 @@ CURRENT_MENU = {
 
 
 VIDEO_URL_TO_PLAY = ""
+
+
+"""
+This dict keeps tracks on each encountered
+errors during the add-on navigation
+"""
+ALL_REPORTED_ERROR = []

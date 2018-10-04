@@ -288,7 +288,11 @@ class Dispatcher(object):
             dialog = xbmcgui.Dialog()
             dialog.notification(e.__class__.__name__, str(e), addon_data.getAddonInfo("icon"))
             logger.critical(str(e), exc_info=1)
+
+            # Hack perso
             bridge.LAST_MENU_TRIGGER_ERROR = True
+            bridge.TRIGGER_ERROR_ROUTE = self.selector
+            bridge.TRIGGER_ERROR_PARAMS = str(self.callback_params)
 
         else:
             from . import start_time
