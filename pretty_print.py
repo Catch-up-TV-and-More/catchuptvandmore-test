@@ -133,9 +133,22 @@ def format_item(item, cnt):
     else:
         fanart_pp = RED_RING
 
+    # Duration
+    duration_pp = ''
+    if 'video' in listitem._info and 'duration' in listitem._info['video']:
+        duration_sec = listitem._info['video']['duration']
+        if duration_sec < 60:
+            duration_pp = str(duration_sec) + ' s'
+        else:
+            hours = duration_sec // 3600
+            duration_sec = duration_sec - (hours * 3600)
+            minutes = duration_sec // 60
+            seconds = duration_sec - (minutes * 60)
+            if hours == 0:
+                duration_pp = str(minutes) + ':' + str(seconds)
+            else:
+                duration_pp = str(hours) + ':' + str(minutes) + ':' + str(seconds)
 
-
-    '''
     if listitem._label2:
         print('    - [label2] = ' + listitem._label2)
 
@@ -163,7 +176,6 @@ def format_item(item, cnt):
         for property_item_k, property_item_v in listitem._property.items():
             print('    - [' + property_item_k + '] = ' + repr(property_item_v))
 
-    '''
 
     return {
         'key': str(cnt),
@@ -171,7 +183,8 @@ def format_item(item, cnt):
         'label': label_pp,
         'plot': plot_pp,
         'thumb': thumb_pp,
-        'fanart': fanart_pp
+        'fanart': fanart_pp,
+        'duration': duration_pp
     }
 
 
@@ -183,10 +196,11 @@ def print_formated_listing(items):
     first_line = {
         'key': '',
         'type': '',
-        'label': ' Label',
-        'plot': ' Plot',
-        'thumb': ' Thumb',
-        'fanart': ' Fanart'
+        'label': 'Label',
+        'plot': 'Plot',
+        'thumb': 'Thumb',
+        'fanart': 'Fanart',
+        'duration': 'Time'
 
     }
 
@@ -196,10 +210,11 @@ def print_formated_listing(items):
         previous_line = {
             'key': str(0),
             'type': LEFT_ARROW,
-            'label': ' Previous menu',
+            'label': 'Previous menu',
             'plot': '',
             'thumb': '',
-            'fanart': ''
+            'fanart': '',
+            'duration': ''
         }
         listing_array.append(previous_line)
 
@@ -214,12 +229,12 @@ def print_formated_listing(items):
         if i == 0:
             print(dash)
 
-        print('{:{key_size}}{:{type_size}}{:{label_size}}{:{plot_size}} \
-               {:{thumb_size}}{:{fanart_size}}'.format(
+        print('{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{thumb_size}}{:{fanart_size}}'.format(
             listing_array[i]['key'],
             listing_array[i]['type'],
             listing_array[i]['label'],
             listing_array[i]['plot'],
+            listing_array[i]['duration'],
             listing_array[i]['thumb'],
             listing_array[i]['fanart'],
             key_size=3,
@@ -227,7 +242,8 @@ def print_formated_listing(items):
             label_size=compute_column_size('label'),
             plot_size=compute_column_size('plot'),
             thumb_size=6,
-            fanart_size=6
+            fanart_size=6,
+            duration_size=8
         ))
 
         if i == 0:

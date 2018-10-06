@@ -239,7 +239,8 @@ while(True):
             # Else if we are not in auto exploration mode
             # and if the current level is in the AUTO_SELECT dict, then the script
             # auto select the item number of the dict
-            elif len(runtime.CURRENT_PATH) in config.AUTO_SELECT:
+            elif len(runtime.CURRENT_PATH) in config.AUTO_SELECT and \
+                    config.AUTO_SELECT[len(runtime.CURRENT_PATH)] != -1:
                 next_item = config.AUTO_SELECT[len(runtime.CURRENT_PATH)]
 
             # Finaly, we ask the user to choose the item number

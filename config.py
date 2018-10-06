@@ -18,7 +18,7 @@ ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up T
 When set to True, you can see the messages
 normally send to Kodi log by CodeQuick or by your plugin
 """
-ENABLE_FAKE_KODI_LOG = False
+ENABLE_FAKE_KODI_LOG = True
 
 
 """
@@ -26,7 +26,7 @@ When set to True, you can see log
 messages when a fake Kodi API
 function of xbmcaddon module is called
 """
-ENABLE_MOCK_XBMCADDON_LOG = False
+ENABLE_MOCK_XBMCADDON_LOG = True
 
 
 """
@@ -34,14 +34,14 @@ When set to True, you can see log
 message when a fake Kodi API
 function of xbmc module is called
 """
-ENABLE_MOCK_XBMC_LOG = False
+ENABLE_MOCK_XBMC_LOG = True
 
 
 """
 Console size (in order to compute the collumn size)
 If you want to reduce the size of the menu array
 """
-CONSOLE_SIZE = 130
+CONSOLE_SIZE = 160
 
 
 #################################################
@@ -56,12 +56,12 @@ the AUTO_SELECT dict then the script will
 auto select the item number of the dict.
 """
 AUTO_SELECT = {
-    # 1: 2,  # At level 1, choose item number 2 (Replay TV)
-    # 2: 1,  # At level 2, choose item number 1 (France)
-    # 3: 1,  # TF1
-    # 4: 5,
-    # 5: 34,
-    # 6: 1
+    1: 2,
+    2: 1,
+    3: 1,
+    4: 3,
+    5: 6,
+    6: 4
 }
 
 
@@ -76,7 +76,7 @@ AUTO_SELECT = {
 If set to True the script will try to explorer each menu
 and sub-menu one by one and it keeps tracks of encountered errors
 """
-DEPTH_EXPLORATION_MODE = True
+DEPTH_EXPLORATION_MODE = False
 
 
 """
