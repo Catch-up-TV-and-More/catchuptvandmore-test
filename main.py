@@ -18,6 +18,7 @@ import mock_xbmc
 import mock_xbmcplugin
 import mock_xbmcgui
 
+
 print('')
 print('#######################################')
 print('#                                     #')
@@ -211,7 +212,6 @@ while(True):
                         if cnt >= config.MAX_ITEMS_NUMBER_PER_MENU:
                             break
 
-
                 if next_item == -2:
                     if not runtime.ITEMS_TO_EXPLORE and not runtime.PATH_TO_REACH:
                         # If there is no more EP to explore
@@ -229,11 +229,8 @@ while(True):
                                 (len(current_path_l) == len(item_to_explore) and \
                                     current_path_l != item_to_explore):
                             next_item = 0
-                            print('IL FAUT RECULER')
                         else:
                             runtime.ITEMS_TO_EXPLORE.pop()
-                            print ('ITEM_TO_EXPLORE: ' + str(item_to_explore))
-                            print('')
                             next_item = item_to_explore[-1]
 
             # Else if we are not in auto exploration mode
@@ -247,6 +244,7 @@ while(True):
             else:
                 # We wait the user input
                 try:
+                    sys.stdout.flush()
                     next_item = int(input('Next item to select? \n'))
                 except ValueError:
                     pass
