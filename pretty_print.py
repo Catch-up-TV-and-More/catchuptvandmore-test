@@ -149,6 +149,14 @@ def format_item(item, cnt):
             else:
                 duration_pp = str(hours) + ':' + str(minutes) + ':' + str(seconds)
 
+    # Date
+    date_pp = ''
+    if 'video' in listitem._info and 'date' in listitem._info['video']:
+        date_pp = listitem._info['video']['date']
+
+
+
+    '''
     if listitem._label2:
         print('    - [label2] = ' + listitem._label2)
 
@@ -175,6 +183,7 @@ def format_item(item, cnt):
     if listitem._property:
         for property_item_k, property_item_v in listitem._property.items():
             print('    - [' + property_item_k + '] = ' + repr(property_item_v))
+    '''
 
 
     return {
@@ -184,7 +193,8 @@ def format_item(item, cnt):
         'plot': plot_pp,
         'thumb': thumb_pp,
         'fanart': fanart_pp,
-        'duration': duration_pp
+        'duration': duration_pp,
+        'date': date_pp
     }
 
 
@@ -200,7 +210,8 @@ def print_formated_listing(items):
         'plot': 'Plot',
         'thumb': 'Thumb',
         'fanart': 'Fanart',
-        'duration': 'Time'
+        'duration': 'Time',
+        'date': 'Date'
 
     }
 
@@ -214,7 +225,8 @@ def print_formated_listing(items):
             'plot': '',
             'thumb': '',
             'fanart': '',
-            'duration': ''
+            'duration': '',
+            'date': ''
         }
         listing_array.append(previous_line)
 
@@ -229,12 +241,13 @@ def print_formated_listing(items):
         if i == 0:
             print(dash)
 
-        print('{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{thumb_size}}{:{fanart_size}}'.format(
+        print('{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{date_size}}{:{thumb_size}}{:{fanart_size}}'.format(
             listing_array[i]['key'],
             listing_array[i]['type'],
             listing_array[i]['label'],
             listing_array[i]['plot'],
             listing_array[i]['duration'],
+            listing_array[i]['date'],
             listing_array[i]['thumb'],
             listing_array[i]['fanart'],
             key_size=3,
@@ -243,7 +256,8 @@ def print_formated_listing(items):
             plot_size=compute_column_size('plot'),
             thumb_size=6,
             fanart_size=6,
-            duration_size=8
+            duration_size=8,
+            date_size=12
         ))
 
         if i == 0:
