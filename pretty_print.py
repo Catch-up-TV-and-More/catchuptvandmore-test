@@ -6,6 +6,7 @@ import common
 import imghdr
 import urlquick
 
+RIGHT_ARROW = u'\U000027A1'
 LEFT_ARROW = u'\U00002B05'
 FOLDER = u'\U0001F4C1'
 PLAY = u'\U000025B6'
@@ -17,6 +18,8 @@ NO_CHECK = u'\U0000274C'
 RED_RING = u'\U00002B55'
 TV = u'\U0001F4FA'
 WARNING = u'\U000026A0'
+BACK_ARROW = u'\U0001F519'
+LEFT_ARROW_CURVING_RIGHT = u'\U000021AA'
 
 
 def check_image(path):
@@ -189,7 +192,7 @@ def print_formated_listing(items):
 
     listing_array.append(first_line)
 
-    if runtime.CURRENT_LEVEL > 0:
+    if len(runtime.CURRENT_PATH) > 1:
         previous_line = {
             'key': str(0),
             'type': LEFT_ARROW,
@@ -231,3 +234,29 @@ def print_formated_listing(items):
             print(dash)
 
     print('')
+
+
+def current_path_pp(path):
+    path_pp = LEFT_ARROW_CURVING_RIGHT + " "
+    cnt = 0
+    for i in path:
+        if cnt != 0:
+            path_pp += ' ' + RIGHT_ARROW + ' '
+        path_pp += i['label'] + ' (' + str(i['key']) + ')'
+        cnt += 1
+    return path_pp
+
+
+def print_encountered_errors():
+    if runtime.ALL_REPORTED_ERROR:
+        print('')
+        print('Encountered errors list:')
+        cnt = 0
+        for error in runtime.ALL_REPORTED_ERROR:
+            print('\n\t* Error ', cnt)
+            print('\t\t- Type: ', error['type'])
+            print('\t\t- Parent path: ', error['path'])
+            print('\t\t- Route: ', error['route'])
+            print('\t\t- Params: ', error['params'])
+
+            cnt += 1

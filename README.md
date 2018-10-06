@@ -37,9 +37,8 @@ This is the variables list to set with  short description:
 * **ADDON_PATH** :
     * The absolute path of the plugin folder (plugin.video.catchuptvandmore)
 
-* **ENABLE_AUTO_SELECT** :
-    * If set to False, the add-on starts at the root menu and for each menu you have to choose the next menu to explore (this is the default behavior when you run the add-on in Kodi).
-    * If set True, you need to edit the **AUTO_SELECT** dictionary. The key corresponds to the menu level and the value to the item to select. (e.g. with `AUTOSELECT = {0: 2, 1: 12, 3: 5}` the script will automatically choose the item number 2 at the root menu and enter in it. Then it will select item number 12 at the next level. But at the level number 2 you will have to choose the item to select. Finally for the level number 3 the script will select the item number 5).
+* **AUTOSELECT** :
+    * If the current level is in the AUTO_SELECT dict then the script will auto select the item number of the dict value. (e.g. with `AUTOSELECT = {0: 2, 1: 12, 3: 5}` the script will automatically choose the item number 2 at the root menu and enter in it. Then it will select item number 12 at the next level. But at the level number 2 you will have to choose the item to select. Finally for the level number 3 the script will select the item number 5).
 
 * **ENABLE_FAKE_KODI_LOG** :
     * The CodeQuick framework uses the `xbmc.log()`function to print the different events. By setting this variable to True you allowed all messages originally send to `xbmc.log()` to be send on your STDOUT.

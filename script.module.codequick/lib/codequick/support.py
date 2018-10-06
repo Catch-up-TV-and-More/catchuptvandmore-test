@@ -271,6 +271,9 @@ class Dispatcher(object):
         logger.debug("Dispatching to route: '%s'", self.selector)
         logger.debug("Callback parameters: '%s'", self.callback_params)
 
+        bridge.TRIGGER_ERROR_ROUTE = self.selector
+        bridge.TRIGGER_ERROR_PARAMS = str(self.callback_params)
+
         try:
             # Fetch the controling class and callback function/method
             route = self.get_route()
@@ -291,8 +294,6 @@ class Dispatcher(object):
 
             # Hack perso
             bridge.LAST_MENU_TRIGGER_ERROR = True
-            bridge.TRIGGER_ERROR_ROUTE = self.selector
-            bridge.TRIGGER_ERROR_PARAMS = str(self.callback_params)
 
         else:
             from . import start_time

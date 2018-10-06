@@ -3,46 +3,38 @@ import os
 
 # Here you can customize your simulator behavior and your personal configuration
 
-"""
-You need to set your Catch-up TV & More folder path
-"""
+
+# You need to set your Catch-up TV & More folder path
 ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up TV & More', 'plugin.video.catchuptvandmore')
 
 
-"""
-When set to True we are in "auto" explore mode
-You need to configure the AUTO_SELECT dict
-"""
-ENABLE_AUTO_SELECT = False
-AUTO_SELECT = {
-    0: 2,  # At level 0, choose item number 2 (Replay TV)
-    1: 1,  # At level 1, choose item number 1 (France)
-    2: 1,
-    3: 2,
-    4: 1,
-    5: 4
-}
-
+#################################################
+#                                               #
+#                Log and console                #
+#                                               #
+#################################################
 
 """
 When set to True, you can see the messages
 normally send to Kodi log by CodeQuick or by your plugin
 """
-ENABLE_FAKE_KODI_LOG = True
+ENABLE_FAKE_KODI_LOG = False
 
 
 """
 When set to True, you can see log
-message when a fake Kodi API function is called
+messages when a fake Kodi API
+function of xbmcaddon module is called
 """
-ENABLE_MOCK_XBMCADDON_LOG = True
+ENABLE_MOCK_XBMCADDON_LOG = False
 
 
 """
 When set to True, you can see log
-message when a fake Kodi API function is called
+message when a fake Kodi API
+function of xbmc module is called
 """
-ENABLE_MOCK_XBMC_LOG = True
+ENABLE_MOCK_XBMC_LOG = False
 
 
 """
@@ -51,6 +43,81 @@ If you want to reduce the size of the menu array
 """
 CONSOLE_SIZE = 130
 
+
+#################################################
+#                                               #
+#    Manual navigation in menus and submenus    #
+#                                               #
+#################################################
+
+"""
+If the current level is in
+the AUTO_SELECT dict then the script will
+auto select the item number of the dict.
+"""
+AUTO_SELECT = {
+    # 1: 2,  # At level 1, choose item number 2 (Replay TV)
+    # 2: 1,  # At level 2, choose item number 1 (France)
+    # 3: 1,  # TF1
+    # 4: 5,
+    # 5: 34,
+    # 6: 1
+}
+
+
+#################################################
+#                                               #
+#             Auto exploration mode             #
+#                                               #
+#################################################
+
+
+"""
+If set to True the script will try to explorer each menu
+and sub-menu one by one and it keeps tracks of encountered errors
+"""
+DEPTH_EXPLORATION_MODE = True
+
+
+"""
+You can set a list of entry points to start the depth exploration.
+For example if you only want to explore the TF1 channel in Replay TV you can
+add the [0, 1, 1] list (Replay TV, France, TF1).
+If you want to start from the beginning just add the empty list [].
+You need to set at least one entry point.
+"""
+ENTRY_POINTS_TO_EXPLORE = [
+    #[1]
+    [1, 2, 1]
+]
+
+
+"""
+We can limit the number of items to explore per menu
+Set to -1 to disable
+"""
+MAX_ITEMS_NUMBER_PER_MENU = 3
+
+
+"""
+If set to True the script quit at the first error encountered
+"""
+EXIT_IF_ERROR = False
+
+
+"""
+Between each menu the script will
+wait this value in order to "simulate" an normal usage
+(In seconds)
+"""
+SLEEP_TIME = 1
+
+
+#################################################
+#                                               #
+#          Addon settings and labels            #
+#                                               #
+#################################################
 
 """
 This dict simulate your settings.xml file
@@ -199,5 +266,3 @@ FAKE_LABELS = {
     # CodeQuick
     33078: 'Next page'
 }
-
-
