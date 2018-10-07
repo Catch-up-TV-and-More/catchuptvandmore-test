@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+# The unicode_literals import only has
+# an effect on Python 2.
+# It makes string literals as unicode like in Python 3
+from __future__ import unicode_literals
+
+
 import sys
 import mock
 import config
@@ -23,9 +30,14 @@ def fake_translate_path(path):
 
 
 def get_localized_string(id_):
+    result = str(id_)
+    if id_ in config.ADDON_FAKE_LABELS:
+        result = config.ADDON_FAKE_LABELS[id_]
+    elif id_ in config.CODEQUICK_FAKE_LABELS:
+        result = config.CODEQUICK_FAKE_LABELS[id_]
     if config.ENABLE_MOCK_XBMC_LOG:
-        print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + config.FAKE_LABELS.get(id_, str(id_)) + '"')
-    return config.FAKE_LABELS.get(id_, str(id_))
+        print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + result + '"')
+    return result
 
 
 mock_xbmc = mock.MagicMock()

@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+# The unicode_literals import only has
+# an effect on Python 2.
+# It makes string literals as unicode like in Python 3
+from __future__ import unicode_literals
+
+
 import sys
 import mock
 import runtime

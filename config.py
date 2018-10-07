@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+
+# The unicode_literals import only has
+# an effect on Python 2.
+# It makes string literals as unicode like in Python 3
+from __future__ import unicode_literals
+
 import os
 
 # Here you can customize your simulator behavior and your personal configuration
@@ -6,7 +12,6 @@ import os
 
 # You need to set your Catch-up TV & More folder path
 ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up TV & More', 'plugin.video.catchuptvandmore')
-
 
 #################################################
 #                                               #
@@ -22,7 +27,7 @@ To reduce the verbosity you can set the minimum level to be print
 (> 3: Less verbose)
 """
 ENABLE_FAKE_KODI_LOG = True
-KODI_LOG_MIN_LEVEL = 4
+KODI_LOG_MIN_LEVEL = 0
 
 
 """
@@ -30,7 +35,7 @@ When set to True, you can see log
 messages when a fake Kodi API
 function of xbmcaddon module is called
 """
-ENABLE_MOCK_XBMCADDON_LOG = False
+ENABLE_MOCK_XBMCADDON_LOG = True
 
 
 """
@@ -138,7 +143,7 @@ DISABLE_VIDEO_PLAYER = False
 """
 This dict simulate your settings.xml file
 """
-FAKE_SETTINGS = {
+ADDON_FAKE_SETTINGS = {
     # Main menu
     "live_tv": "true",
     "live_tv.order": "1",
@@ -664,7 +669,7 @@ You can generate this dict with this command :
 python generate_labels_dict_from_strings.po your_strings.po
 if you need to use french labels
 """
-FAKE_LABELS = {
+ADDON_FAKE_LABELS = {
     30000: 'Main menu',
     30001: 'Countries',
     30002: 'Quality and content',
@@ -775,8 +780,14 @@ FAKE_LABELS = {
     30714: 'Search videos',
     30715: 'Search programs',
     30716: 'Video stream is not available',
+}
 
 
-    # CodeQuick
+CODEQUICK_FAKE_SETTINGS = {
+
+}
+
+
+CODEQUICK_FAKE_LABELS = {
     33078: 'Next page'
 }

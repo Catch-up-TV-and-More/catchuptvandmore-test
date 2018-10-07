@@ -1,5 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# The unicode_literals import only has
+# an effect on Python 2.
+# It makes string literals as unicode like in Python 3
+from __future__ import unicode_literals
+
 import sys
 import mock
 import importlib
@@ -17,6 +23,7 @@ import mock_xbmcaddon
 import mock_xbmc
 import mock_xbmcplugin
 import mock_xbmcgui
+import mock_youtube_dl
 
 
 print('')
@@ -32,9 +39,6 @@ print('')
 
 # Add codequick module to python path
 sys.path.append(common.CODEQUICK_PATH)
-
-# Add Youtube-DL module to python path
-sys.path.append(common.YOUTUBE_DL_PATH)
 
 # Add Catch-up TV & More module to python path
 sys.path.append(config.ADDON_PATH)
@@ -71,8 +75,11 @@ while(True):
         # (usefull during dev)
         for k, v in sys.modules.items():
             if 'plugin.video.catchuptvandmore' in str(v):
-                importlib.reload(v)
-        importlib.reload(addon)
+                try:
+                    importlib.reload(addon)  # python3
+                except AttributeError:
+                    reload(addon)  # python2
+
 
         # Now we simulate the addon execution
         addon.main()
@@ -111,7 +118,7 @@ while(True):
                 # print('MPV_STDOUT: \n' + MPV_STDOUT)
 
                 if 'Exiting... (Quit)' not in MPV_STDOUT:
-                    print(WARNING + ' This video does not seem to work (see log above) ' + WARNING)
+                    print((WARNING + ' This video does not seem to work (see log above) ' + WARNING).encode('utf-8'))
                     print('')
 
                     runtime.ALL_REPORTED_ERROR.append({
@@ -131,9 +138,9 @@ while(True):
             # then Kodi just relaod the previous menu,
             # So we have to simulate the back function
             if bridge.LAST_MENU_TRIGGER_ERROR:
-                print(WARNING + ' The last selection triggered an error (see log above) ' + WARNING)
-                print('\tRoute that triggered the error: ' + bridge.TRIGGER_ERROR_ROUTE)
-                print('\tParams that triggered the error: ' + bridge.TRIGGER_ERROR_PARAMS)
+                print((WARNING + ' The last selection triggered an error (see log above) ' + WARNING).encode('utf-8'))
+                print(('\tRoute that triggered the error: ' + bridge.TRIGGER_ERROR_ROUTE).encode('utf-8'))
+                print(('\tParams that triggered the error: ' + bridge.TRIGGER_ERROR_PARAMS).encode('utf-8'))
                 print('')
 
                 runtime.ALL_REPORTED_ERROR.append({
