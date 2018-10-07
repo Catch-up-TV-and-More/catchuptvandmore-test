@@ -14,7 +14,7 @@ LOGWARNING = 3
 
 
 def fake_log(msg, level=LOGDEBUG):
-    if config.ENABLE_FAKE_KODI_LOG:
+    if config.ENABLE_FAKE_KODI_LOG and level >= config.KODI_LOG_MIN_LEVEL:
         print('[FakeKodiLog level ' + str(level) + '] ' + msg)
 
 

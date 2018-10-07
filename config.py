@@ -16,9 +16,13 @@ ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up T
 
 """
 When set to True, you can see the messages
-normally send to Kodi log by CodeQuick or by your plugin
+normally send to Kodi log by CodeQuick or by your plugin.
+To reduce the verbosity you can set the minimum level to be print
+(0 : Very verbose)
+(> 3: Less verbose)
 """
 ENABLE_FAKE_KODI_LOG = True
+KODI_LOG_MIN_LEVEL = 4
 
 
 """
@@ -26,7 +30,7 @@ When set to True, you can see log
 messages when a fake Kodi API
 function of xbmcaddon module is called
 """
-ENABLE_MOCK_XBMCADDON_LOG = True
+ENABLE_MOCK_XBMCADDON_LOG = False
 
 
 """
@@ -56,9 +60,9 @@ the AUTO_SELECT dict then the script will
 auto select the item number of the dict.
 """
 AUTO_SELECT = {
-    1: 2,
-    2: 1,
-    3: 1,
+    1: 3,
+    2: -1,
+    3: -1,
     4: -1,
     5: -1,
     6: -1
@@ -76,7 +80,7 @@ AUTO_SELECT = {
 If set to True the script will try to explorer each menu
 and sub-menu one by one and it keeps tracks of encountered errors
 """
-DEPTH_EXPLORATION_MODE = True
+DEPTH_EXPLORATION_MODE = False
 
 
 """
@@ -122,7 +126,7 @@ SLEEP_TIME = 0
 If you want to disable to video player
 and just navigaate in the menus
 """
-DISABLE_VIDEO_PLAYER = True
+DISABLE_VIDEO_PLAYER = False
 
 
 #################################################

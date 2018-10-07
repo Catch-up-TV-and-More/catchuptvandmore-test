@@ -33,6 +33,9 @@ print('')
 # Add codequick module to python path
 sys.path.append(common.CODEQUICK_PATH)
 
+# Add Youtube-DL module to python path
+sys.path.append(common.YOUTUBE_DL_PATH)
+
 # Add Catch-up TV & More module to python path
 sys.path.append(config.ADDON_PATH)
 
