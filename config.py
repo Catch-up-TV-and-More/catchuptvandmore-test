@@ -133,6 +133,11 @@ and just navigaate in the menus
 """
 DISABLE_VIDEO_PLAYER = False
 
+"""
+If you need to simulate a Kodi version
+just change this value to JARVIS, KRYPTON or LEIA
+"""
+KODI_VERSION = 'LEIA'
 
 #################################################
 #                                               #

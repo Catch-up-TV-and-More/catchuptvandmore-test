@@ -20,6 +20,7 @@ LOGSEVERE = 5
 LOGWARNING = 3
 
 
+
 def fake_log(msg, level=LOGDEBUG):
     if config.ENABLE_FAKE_KODI_LOG and level >= config.KODI_LOG_MIN_LEVEL:
         print('[FakeKodiLog level ' + str(level) + '] ' + msg)
@@ -27,6 +28,17 @@ def fake_log(msg, level=LOGDEBUG):
 
 def fake_translate_path(path):
     return path
+
+
+def fake_get_info_label(id_):
+    if id_ == 'System.BuildVersion':
+        if config.KODI_VERSION == 'JARVIS':
+            return '16.3 fakefakefakefakefake'
+        if config.KODI_VERSION == 'KRYPTON':
+            return '17.5 fakefakefakefakefake'
+        if config.KODI_VERSION == 'LEIA':
+            return '18.0 fakefakefakefakefake'
+    return ''
 
 
 def get_localized_string(id_):
@@ -55,6 +67,7 @@ mock_xbmc.LOGWARNING = LOGWARNING
 
 mock_xbmc.translatePath.side_effect = fake_translate_path
 mock_xbmc.getLocalizedString.side_effect = get_localized_string
+mock_xbmc.getInfoLabel.side_effect = fake_get_info_label
 
 # Say to Python that the xbmc module is mock_xbmc
 sys.modules['xbmc'] = mock_xbmc
