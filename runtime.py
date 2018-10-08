@@ -35,6 +35,13 @@ before starting the auto exploration
 """
 PATH_TO_REACH = True
 
+"""
+This list keeps track of all
+explored items in a pretty printable format
+in order to be printed at the end
+"""
+ITEMS_EXPLORED_LIST = []
+
 
 def get_path_keys_list(path):
     keys_list = []

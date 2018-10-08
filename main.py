@@ -83,6 +83,10 @@ while(True):
         # If next_item = -2 we just reload the addon we the same sys.argv
         next_item = -2
 
+        # Keeps track of all
+        # explored items in a pretty printable format
+        runtime.ITEMS_EXPLORED_LIST.append(current_path_pp(runtime.CURRENT_PATH))
+
         # If Kodi want to play a video
         if 'video' in runtime.CURRENT_PATH[-1]:
             # We need to go back to the last menu after the video player
@@ -288,6 +292,15 @@ while(True):
             }
 
             runtime.CURRENT_PATH.append(next_menu_dict)
+
+
+if CONFIG['print_all_explored_items']:
+    print('')
+    print('All explored items:')
+    print('')
+    for path in runtime.ITEMS_EXPLORED_LIST:
+        print(path)
+    print('')
 
 
 # We want to print all encountered errors

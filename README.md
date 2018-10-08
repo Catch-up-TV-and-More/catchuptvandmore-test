@@ -43,6 +43,9 @@ python3 main.py -c path/to/config/file 2>&1| tee ./log.txt
 
 The information below use the CLI format but you can easily find the corresponding variable name for the JSON file (e.g. `--max-items-per-menu` ==> `max_items_per_menu`).
 
+
+### General parameters
+
 * **-a/--addon-path STRING**:
     * The path of the plugin folder (plugin.video.catchuptvandmore)
 
@@ -66,6 +69,11 @@ The information below use the CLI format but you can easily find the correspondi
     * Kodi version to simulate
     * Default value: LEIA
 
+* **--print-all-explored-items**:
+    * Print all explored items when exit the simulator
+
+### Logging
+
 * **--disable-kodi-log**:
     * The CodeQuick framework uses the `xbmc.log()` function to print the different events. By setting this flag you prevent all messages originally send to `xbmc.log()` to be print on your STDOUT.
 
@@ -82,6 +90,9 @@ The information below use the CLI format but you can easily find the correspondi
 * **--disable-xbmc-mock-log**:
   * Like **--disable-xbmcaddon-mock-log** but for the `xbmc` module.
 
+
+### Auto exploration mode
+
 * **--auto-exploration**:
   * Enable the auto exploration mode of the simulator
 
@@ -97,6 +108,9 @@ The information below use the CLI format but you can easily find the correspondi
 
 * **--max-items-to-explore INT**:
     * If the total number of item explored reach this value then stop the exploration
+
+
+### Addon settings and labels
 
 * **ADDON_FAKE_SETTINGS** :
   * This dictionary corresponds to the `settings.xml` file of the add-on. Maybe soon the script will be able to directly parse and use the "real" `settings.xml` of the add-on...
