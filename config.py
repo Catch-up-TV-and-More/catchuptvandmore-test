@@ -92,6 +92,8 @@ if 'wait_time' in CONFIG_JSON and CONFIG['wait_time'] == 1:
 
 
 # We get the full path of the addon path
+if CONFIG['addon_path'] == '':
+    raise Exception('You need to specify the path of plugin.video.catchuptvandmore')
 CONFIG['addon_path'] = os.path.abspath(CONFIG['addon_path'])
 
 
@@ -99,7 +101,6 @@ CONFIG['addon_path'] = os.path.abspath(CONFIG['addon_path'])
 if CONFIG['auto_select'] != '':
     auto_select_l = []
     for item in CONFIG['auto_select'].split('-'):
-        print(item)
         auto_select_l.append(int(item))
     CONFIG['auto_select'] = auto_select_l
 
