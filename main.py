@@ -8,9 +8,8 @@ import subprocess
 import bridge
 import time
 import signal
-import argparse
 
-import config
+from config import CONFIG
 import common
 import runtime
 from pretty_print import *
@@ -33,13 +32,12 @@ print('')
 print('# During addon navigation enter -1 to exit simulator')
 print('')
 
-exit(0)
 
 # Add codequick module to python path
 sys.path.append(common.CODEQUICK_PATH)
 
 # Add Catch-up TV & More module to python path
-sys.path.append(config.ADDON_PATH)
+sys.path.append(CONFIG['addon_path'])
 
 # And import Catch-up TV & More module
 import addon
@@ -90,12 +88,12 @@ while(True):
             # We need to go back to the last menu after the video player
             next_item = 0
 
-            if not config.DISABLE_VIDEO_PLAYER:
+            if not CONFIG['disable_video_player']:
                 #  We start mpv with the video
                 p = subprocess.Popen(['mpv', runtime.CURRENT_PATH[-1]['video']['url']], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 output = ''
 
-                if config.DEPTH_EXPLORATION_MODE:
+                if CONFIG['auto_exploration']:
                     # We need to stop the video after some time
                     time.sleep(5)
                     p.send_signal(signal.SIGINT)
@@ -148,7 +146,7 @@ while(True):
 
                 bridge.LAST_MENU_TRIGGER_ERROR = False
 
-                if config.EXIT_IF_ERROR:
+                if CONFIG['exit_on_error']:
                     next_item = -1
 
             else:
@@ -163,7 +161,7 @@ while(True):
         if next_item == -2:
 
             # If we are in auto exploration mode
-            if config.DEPTH_EXPLORATION_MODE:
+            if CONFIG['auto_exploration']:
 
                 # First we wait a fake time
                 sys.stdout.flush()
@@ -178,7 +176,7 @@ while(True):
                 # If we currently are on the road to reach the next entry point to process
                 if runtime.PATH_TO_REACH:
 
-                    entry_point = config.ENTRY_POINTS_TO_EXPLORE[-1]
+                    entry_point = CONFIG['entry_points'][-1]
 
                     if len(current_path_l) > len(entry_point):
                         # We need to go back in previous level
@@ -241,9 +239,8 @@ while(True):
             # Else if we are not in auto exploration mode
             # and if the current level is in the AUTO_SELECT dict, then the script
             # auto select the item number of the dict
-            elif len(runtime.CURRENT_PATH) in config.AUTO_SELECT and \
-                    config.AUTO_SELECT[len(runtime.CURRENT_PATH)] != -1:
-                next_item = config.AUTO_SELECT[len(runtime.CURRENT_PATH)]
+            elif len(CONFIG['auto_select']) >= len(runtime.CURRENT_PATH):
+                next_item = CONFIG['auto_select'][len(runtime.CURRENT_PATH) - 1]
 
             # Else we ask the user to choose the next item number
             else:
@@ -257,6 +254,10 @@ while(True):
 
         # We say that this path is now explored
         runtime.ITEMS_ALREADY_EXPLORED.add(current_path_t)
+
+        # If there is no item for this value
+        if next_item > len(items) or (next_item == 0 and len(runtime.CURRENT_PATH) <= 1):
+            next_item = -2
 
         # If next_item has the default value
         if next_item == -2:

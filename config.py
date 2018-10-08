@@ -15,151 +15,43 @@ parser.add_argument('--kodi-version', default='LEIA', choices=['LEIA', 'KRYPTON'
 
 log_group = parser.add_argument_group('Logging')
 log_group.add_argument('--disable-kodi-log', action='store_true', help='Disable stdout Kodi logging')
-log_group.add_argument('--kodi-log-level', type=int, help='Minimum Kodi log level to be logging')
+log_group.add_argument('--kodi-log-level', type=int, default=0, help='Minimum Kodi log level to be logging')
 log_group.add_argument('--disable-xbmcaddon-mock-log', action='store_true', help='Disable log messages of xbmcaddon module functions calls')
 log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')
 
 
 auto_exploration_group = parser.add_argument_group('Auto exploration mode')
 auto_exploration_group.add_argument('--auto-exploration', action='store_true', help='Enable auto exploration of addon menus')
-auto_exploration_group.add_argument('--entry-points', default='[1]', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'[1], [1-2-1]\')')
+auto_exploration_group.add_argument('--entry-points', default='[1]', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'1, 1-2-1\')')
 auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
 auto_exploration_group.add_argument('--wait-time', type=int, default=1, help='Time to wait between each menu during exploration [1sec]')
 
 
-parser.parse_args()
+args = parser.parse_args()
 
-# Here you can customize your simulator behavior and your personal configuration
-
-
-# You need to set your Catch-up TV & More folder path
-ADDON_PATH = os.path.join(os.sep, 'Users', 'sylvain', 'Local_files', 'Catch-up TV & More', 'plugin.video.catchuptvandmore')
-
-#################################################
-#                                               #
-#                Log and console                #
-#                                               #
-#################################################
-
-"""
-When set to True, you can see the messages
-normally send to Kodi log by CodeQuick or by your plugin.
-To reduce the verbosity you can set the minimum level to be print
-(0 : Very verbose)
-(> 3: Less verbose)
-"""
-ENABLE_FAKE_KODI_LOG = True
-KODI_LOG_MIN_LEVEL = 0
+CONFIG = vars(args)
 
 
-"""
-When set to True, you can see log
-messages when a fake Kodi API
-function of xbmcaddon module is called
-"""
-ENABLE_MOCK_XBMCADDON_LOG = False
+print(str(CONFIG))
 
+# We get the full path of the addon path
+CONFIG['addon_path'] = os.path.abspath(CONFIG['addon_path'])
 
-"""
-When set to True, you can see log
-message when a fake Kodi API
-function of xbmc module is called
-"""
-ENABLE_MOCK_XBMC_LOG = False
+# We transform the auto select string to a list
+auto_select_l = []
+for item in CONFIG['auto_select'].split('-'):
+    auto_select_l.append(int(item))
+CONFIG['auto_select'] = auto_select_l
 
-
-"""
-Console size (in order to compute the collumn size)
-If you want to reduce the size of the menu array
-"""
-CONSOLE_SIZE = 160
-
-
-#################################################
-#                                               #
-#    Manual navigation in menus and submenus    #
-#                                               #
-#################################################
-
-"""
-If the current level is in
-the AUTO_SELECT dict then the script will
-auto select the item number of the dict.
-"""
-AUTO_SELECT = {
-    1: 3,
-    2: -1,
-    3: -1,
-    4: -1,
-    5: -1,
-    6: -1
-}
-
-
-#################################################
-#                                               #
-#             Auto exploration mode             #
-#                                               #
-#################################################
-
-
-"""
-If set to True the script will try to explorer each menu
-and sub-menu one by one and it keeps tracks of encountered errors
-"""
-DEPTH_EXPLORATION_MODE = False
-
-
-"""
-You can set a list of entry points to start the depth exploration.
-For example if you only want to explore the TF1 channel in Replay TV you can
-add the [0, 1, 1] list (Replay TV, France, TF1).
-If you want to start from the beginning just add the empty list [].
-You need to set at least one entry point.
-"""
-ENTRY_POINTS_TO_EXPLORE = [
-    [1]
-    #[1, 2, 1, 1]
-]
-
-
-"""
-We can limit the number of items to explore per menu
-Set to -1 to disable
-"""
-MAX_ITEMS_NUMBER_PER_MENU = 2
-
-
-"""
-If set to True the script quit at the first error encountered
-"""
-EXIT_IF_ERROR = False
-
-
-"""
-Between each menu the script will
-wait this value in order to "simulate" an normal usage
-(In seconds)
-"""
-SLEEP_TIME = 0
-
-#################################################
-#                                               #
-#                     Other                     #
-#                                               #
-#################################################
-
-"""
-If you want to disable to video player
-and just navigaate in the menus
-"""
-DISABLE_VIDEO_PLAYER = False
-
-"""
-If you need to simulate a Kodi version
-just change this value to JARVIS, KRYPTON or LEIA
-"""
-KODI_VERSION = 'LEIA'
+# We transform the entry points string to a list of list
+entry_points_l = []
+entry_points_s = "".join(CONFIG['entry_points'].split())
+for ep in entry_points_s.split(','):
+    entry_point_l = []
+    for item in ep.split('-'):
+        entry_point_l.append(int(item))
+    entry_points_l.append(entry_point_l)
+CONFIG['entry_points'] = entry_points_l
 
 #################################################
 #                                               #

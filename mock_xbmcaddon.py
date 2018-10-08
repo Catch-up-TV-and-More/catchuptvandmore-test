@@ -3,16 +3,16 @@
 import sys
 import mock
 import common
-import config
+from config import *
 
 ADDONS_SETTINGS = {
-    'plugin.video.catchuptvandmore': config.ADDON_FAKE_SETTINGS,
-    'script.module.codequick': config.CODEQUICK_FAKE_SETTINGS
+    'plugin.video.catchuptvandmore': ADDON_FAKE_SETTINGS,
+    'script.module.codequick': CODEQUICK_FAKE_SETTINGS
 }
 
 ADDONS_LABELS = {
-    'plugin.video.catchuptvandmore': config.ADDON_FAKE_LABELS,
-    'script.module.codequick': config.CODEQUICK_FAKE_LABELS
+    'plugin.video.catchuptvandmore': ADDON_FAKE_LABELS,
+    'script.module.codequick': CODEQUICK_FAKE_LABELS
 }
 
 ADDONS_NAME = {
@@ -21,7 +21,7 @@ ADDONS_NAME = {
 }
 
 ADDONS_PATHS = {
-    'plugin.video.catchuptvandmore': config.ADDON_PATH,
+    'plugin.video.catchuptvandmore': CONFIG['addon_path'],
     'script.module.codequick': common.CODEQUICK_ADDON_PATH
 }
 
@@ -64,22 +64,22 @@ class FakeAddon(object):
             raise Exception(
                 'Need to complete getAddonInfo mock for info_id: ' + info_id)
 
-        if config.ENABLE_MOCK_XBMCADDON_LOG:
+        if not CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] getAddonInfo of "' + info_id + '" --> "' + result + '"')
         return result
 
     def getSetting(self, setting_id):
-        if config.ENABLE_MOCK_XBMCADDON_LOG:
+        if not CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] getSetting of "' + setting_id + '" --> "' + self._settings.get(setting_id, '') + '"')
         return self._settings.get(setting_id, '')
 
     def setSetting(self, _id, value):
-        if config.ENABLE_MOCK_XBMCADDON_LOG:
+        if not CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] setSetting of "' + _id + '" --> "' + value + '"')
         self._settings[_id] = value
 
     def getLocalizedString(self, id_):
-        if config.ENABLE_MOCK_XBMCADDON_LOG:
+        if not CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_, str(id_)) + '"')
         return self._labels.get(id_, str(id_))
 

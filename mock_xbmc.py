@@ -2,7 +2,7 @@
 
 import sys
 import mock
-import config
+from config import *
 
 LOGDEBUG = 0
 LOGERROR = 4
@@ -15,7 +15,7 @@ LOGWARNING = 3
 
 
 def fake_log(msg, level=LOGDEBUG):
-    if config.ENABLE_FAKE_KODI_LOG and level >= config.KODI_LOG_MIN_LEVEL:
+    if not CONFIG['disable_kodi_log'] and level >= CONFIG['kodi_log_level']:
         print('[FakeKodiLog level ' + str(level) + '] ' + msg)
 
 
@@ -25,11 +25,11 @@ def fake_translate_path(path):
 
 def fake_get_info_label(id_):
     if id_ == 'System.BuildVersion':
-        if config.KODI_VERSION == 'JARVIS':
+        if CONFIG['kodi_version'] == 'JARVIS':
             return '16.3 fakefakefakefakefake'
-        if config.KODI_VERSION == 'KRYPTON':
+        if CONFIG['kodi_version'] == 'KRYPTON':
             return '17.5 fakefakefakefakefake'
-        if config.KODI_VERSION == 'LEIA':
+        if CONFIG['kodi_version'] == 'LEIA':
             return '18.0 fakefakefakefakefake'
     return ''
 
@@ -40,7 +40,7 @@ def get_localized_string(id_):
         result = config.ADDON_FAKE_LABELS[id_]
     elif id_ in config.CODEQUICK_FAKE_LABELS:
         result = config.CODEQUICK_FAKE_LABELS[id_]
-    if config.ENABLE_MOCK_XBMC_LOG:
+    if not CONFIG['disable_xbmc_mock_log']:
         print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + result + '"')
     return result
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import config
+from config import CONFIG
 import runtime
 import common
 
@@ -91,9 +91,9 @@ def truncate_string(column, string):
 
 def compute_column_size(column):
     if column == 'label':
-        return int(config.CONSOLE_SIZE / 5)
+        return int(CONFIG['console_size'] / 5)
     if column == 'plot':
-        return int(config.CONSOLE_SIZE / 4)
+        return int(CONFIG['console_size'] / 4)
     raise Exception(
         'Unknown column name: ' + column)
 
@@ -196,7 +196,7 @@ def format_item(item, cnt):
 
 
 def print_formated_listing(items):
-    dash = '-' * config.CONSOLE_SIZE
+    dash = '-' * CONFIG['console_size']
 
     listing_array = []
 
