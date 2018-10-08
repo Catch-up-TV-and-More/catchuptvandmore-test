@@ -6,7 +6,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Catch-up TV & More simulator')
 
 parser.add_argument('-a', '--addon-path', default='', help='Path of plugin.video.catchuptvandmore')
-parser.add_argument('-c', '--config-file', default='', help='Optionnal JSON config file (CLI args take precedence over the config file)')
+parser.add_argument('-c', '--config-file', default='', help='Optional JSON config file (CLI args take precedence over the config file)')
 parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
 parser.add_argument('--auto-select', default='', help='Auto select items from root menu, separate items with dashes (e.g. \'1-2-1-13\')')
 parser.add_argument('--exit-on-error', action='store_true', help='Quit simulator at the first error encountered')
