@@ -26,6 +26,7 @@ auto_exploration_group.add_argument('--auto-exploration', action='store_true', h
 auto_exploration_group.add_argument('--entry-points', default='1', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'1, 1-2-1\')')
 auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
 auto_exploration_group.add_argument('--wait-time', type=int, default=1, help='Time to wait between each menu during exploration [1sec]')
+auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
 
 
 CONFIG_CLI = vars(parser.parse_args())
@@ -89,6 +90,9 @@ if 'max_items_per_menu' in CONFIG_JSON and CONFIG['max_items_per_menu'] == -1:
 
 if 'wait_time' in CONFIG_JSON and CONFIG['wait_time'] == 1:
     CONFIG['wait_time'] = CONFIG_JSON['wait_time']
+
+if 'max_items_to_explore' in CONFIG_JSON and CONFIG['max_items_to_explore'] == -1:
+    CONFIG['max_items_to_explore'] = CONFIG_JSON['max_items_to_explore']
 
 
 # We get the full path of the addon path

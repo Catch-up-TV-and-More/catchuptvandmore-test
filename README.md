@@ -95,6 +95,9 @@ The information below use the CLI format but you can easily find the correspondi
     * Time to wait between each explored menu. To simulate an "human" usage...
     * Default value: 1 second
 
+* **--max-items-to-explore INT**:
+    * If the total number of item explored reach this value then stop the exploration
+
 * **ADDON_FAKE_SETTINGS** :
   * This dictionary corresponds to the `settings.xml` file of the add-on. Maybe soon the script will be able to directly parse and use the "real" `settings.xml` of the add-on...
 

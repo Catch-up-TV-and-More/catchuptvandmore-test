@@ -236,6 +236,10 @@ while(True):
                             runtime.ITEMS_TO_EXPLORE.pop()
                             next_item = item_to_explore[-1]
 
+                if len(ITEMS_ALREADY_EXPLORED) >= config['max_items_to_explore']:
+                    print('Max items to explore reached')
+                    next_item = -1
+
             # Else if we are not in auto exploration mode
             # and if the current level is in the AUTO_SELECT dict, then the script
             # auto select the item number of the dict
@@ -255,7 +259,7 @@ while(True):
         # We say that this path is now explored
         runtime.ITEMS_ALREADY_EXPLORED.add(current_path_t)
 
-        # If there is no item for this value
+        # If there is no item for this value (to prevent error)
         if next_item > len(items) or (next_item == 0 and len(runtime.CURRENT_PATH) <= 1):
             next_item = -2
 
