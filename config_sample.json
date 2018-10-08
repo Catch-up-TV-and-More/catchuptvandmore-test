@@ -1,0 +1,6 @@
+{
+	"addon_path": "../plugin.video.catchuptvandmore",
+	"exit_on_error": true,
+	"auto_select": "1-2-1-13",
+	"max_items_per_menu" : 5
+}

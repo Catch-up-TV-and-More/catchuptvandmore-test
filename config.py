@@ -37,6 +37,11 @@ if CONFIG_CLI['config_file'] != '':
     with open(CONFIG_CLI['config_file']) as f:
         CONFIG_JSON = json.load(f)
 
+        # Check json dict
+        for k in CONFIG_JSON.keys():
+            if k not in CONFIG_CLI:
+                raise Exception('The key "' + k + '" in your json file is invalid')
+
 
 # We keep in priority the infos from the CLI
 CONFIG = CONFIG_CLI
