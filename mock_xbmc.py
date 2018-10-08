@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
-
-
 import sys
 import mock
 import config
@@ -18,7 +12,6 @@ LOGNONE = 7
 LOGNOTICE = 2
 LOGSEVERE = 5
 LOGWARNING = 3
-
 
 
 def fake_log(msg, level=LOGDEBUG):

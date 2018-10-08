@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
-
-
 import sys
 import mock
 import common
@@ -88,7 +82,6 @@ class FakeAddon(object):
         if config.ENABLE_MOCK_XBMCADDON_LOG:
             print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_, str(id_)) + '"')
         return self._labels.get(id_, str(id_))
-
 
 
 mock_xbmcaddon = mock.MagicMock()

@@ -1,10 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
 
 import sys
 import mock
@@ -13,6 +8,7 @@ import subprocess
 import bridge
 import time
 import signal
+import argparse
 
 import config
 import common
@@ -37,6 +33,8 @@ print('')
 print('# During addon navigation enter -1 to exit simulator')
 print('')
 
+exit(0)
+
 # Add codequick module to python path
 sys.path.append(common.CODEQUICK_PATH)
 
@@ -46,7 +44,8 @@ sys.path.append(config.ADDON_PATH)
 # And import Catch-up TV & More module
 import addon
 
-# When you enter in the addon for the first time there is no query and we are at root menu
+# When you enter in the addon for the first time there is
+# no query and we are at root menu
 root_menu_dict = {
     'key': 1,
     'label': 'Root menu',
@@ -54,7 +53,6 @@ root_menu_dict = {
     'process_handle': '1',
     'query_string': ''
 }
-
 runtime.CURRENT_PATH.append(root_menu_dict)
 
 
@@ -70,21 +68,16 @@ while(True):
 
     with mock.patch('sys.argv', fake_args):
 
-        # We need to reload the addon module in order to able
+        # We need to reload the addon module in order to be able
         # to modify the source code of the addon on the fly
         # (usefull during dev)
-        for k, v in sys.modules.items():
-            if 'plugin.video.catchuptvandmore' in str(v):
-                try:
-                    importlib.reload(addon)  # python3
-                except AttributeError:
-                    reload(addon)  # python2
-
+        importlib.reload(addon)
 
         # Now we simulate the addon execution
         addon.main()
 
         # The current path as a list an as a tuple
+        # (usefull vars)
         current_path_l = runtime.get_path_keys_list(runtime.CURRENT_PATH)
         current_path_t = tuple(current_path_l)
 
@@ -92,15 +85,16 @@ while(True):
         # If next_item = -2 we just reload the addon we the same sys.argv
         next_item = -2
 
-        # If Kodi want to play a video we start mpv with the video
+        # If Kodi want to play a video
         if 'video' in runtime.CURRENT_PATH[-1]:
             # We need to go back to the last menu after the video player
             next_item = 0
 
             if not config.DISABLE_VIDEO_PLAYER:
+                #  We start mpv with the video
                 p = subprocess.Popen(['mpv', runtime.CURRENT_PATH[-1]['video']['url']], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
                 output = ''
+
                 if config.DEPTH_EXPLORATION_MODE:
                     # We need to stop the video after some time
                     time.sleep(5)
@@ -118,7 +112,7 @@ while(True):
                 # print('MPV_STDOUT: \n' + MPV_STDOUT)
 
                 if 'Exiting... (Quit)' not in MPV_STDOUT:
-                    print((WARNING + ' This video does not seem to work (see log above) ' + WARNING).encode('utf-8'))
+                    print(WARNING + ' This video does not seem to work (see log above) ' + WARNING)
                     print('')
 
                     runtime.ALL_REPORTED_ERROR.append({
@@ -131,16 +125,18 @@ while(True):
                     if config.EXIT_IF_ERROR:
                         next_item = -1
 
-        # We are in the basic menu case
+        # We are in a basic menu case
         else:
 
-            # If the last menu construction trigger an error
-            # then Kodi just relaod the previous menu,
+            # If the last menu construction triggered an error
+            # then Kodi just relaod the previous menu in real life,
             # So we have to simulate the back function
             if bridge.LAST_MENU_TRIGGER_ERROR:
-                print((WARNING + ' The last selection triggered an error (see log above) ' + WARNING).encode('utf-8'))
-                print(('\tRoute that triggered the error: ' + bridge.TRIGGER_ERROR_ROUTE).encode('utf-8'))
-                print(('\tParams that triggered the error: ' + bridge.TRIGGER_ERROR_PARAMS).encode('utf-8'))
+                next_item = 0
+
+                print(WARNING + ' The last selection triggered an error (see log above) ' + WARNING)
+                print('\tRoute that triggered the error: ' + bridge.TRIGGER_ERROR_ROUTE)
+                print('\tParams that triggered the error: ' + bridge.TRIGGER_ERROR_PARAMS)
                 print('')
 
                 runtime.ALL_REPORTED_ERROR.append({
@@ -151,10 +147,6 @@ while(True):
                 })
 
                 bridge.LAST_MENU_TRIGGER_ERROR = False
-                bridge.TRIGGER_ERROR_ROUTE = ''
-                bridge.TRIGGER_ERROR_PARAMS = ''
-
-                next_item = 0
 
                 if config.EXIT_IF_ERROR:
                     next_item = -1
@@ -183,10 +175,10 @@ while(True):
                 if current_path_t in runtime.ITEMS_ALREADY_EXPLORED:
                     add_items_of_the_current_menu = False
 
+                # If we currently are on the road to reach the next entry point to process
                 if runtime.PATH_TO_REACH:
-                    # Else we have to start a new exploration from an entry point
+
                     entry_point = config.ENTRY_POINTS_TO_EXPLORE[-1]
-                    print('We have to start exploration at the new entry point: ' + str(entry_point))
 
                     if len(current_path_l) > len(entry_point):
                         # We need to go back in previous level
@@ -199,15 +191,18 @@ while(True):
                         add_items_of_the_current_menu = False
 
                     elif current_path_l == entry_point:
-                        print('We just reach the entry point, we can start auto exploration')
+                        # We just reach the entry point,
+                        # we can start auto exploration
                         config.ENTRY_POINTS_TO_EXPLORE.pop()
                         runtime.PATH_TO_REACH = False
                     else:
-                        print('On ne devrait pas etre là ...')
+                        print('Error: On ne devrait pas etre là ...')
                         exit(-1)
 
+                # Now we can add the current menu items to the stack to explore
                 if add_items_of_the_current_menu:
 
+                    # TODO: Add strategy modes (RANDOM, FIRSTS, LASTS)
                     cnt = 0
                     for i in reversed(range(len(items))):
                         item = items[i]
@@ -224,11 +219,10 @@ while(True):
                             break
 
                 if next_item == -2:
+
                     if not runtime.ITEMS_TO_EXPLORE and not runtime.PATH_TO_REACH:
                         # If there is no more EP to explore
                         if not config.ENTRY_POINTS_TO_EXPLORE:
-                            print('No more entry point to explore')
-                            add_items_of_the_current_menu = False
                             next_item = -1
                         else:
                             runtime.PATH_TO_REACH = True
@@ -237,7 +231,7 @@ while(True):
 
                         item_to_explore = runtime.ITEMS_TO_EXPLORE[-1]
                         if len(current_path_l) > len(item_to_explore) or \
-                                (len(current_path_l) == len(item_to_explore) and \
+                                (len(current_path_l) == len(item_to_explore) and
                                     current_path_l != item_to_explore):
                             next_item = 0
                         else:
@@ -251,7 +245,7 @@ while(True):
                     config.AUTO_SELECT[len(runtime.CURRENT_PATH)] != -1:
                 next_item = config.AUTO_SELECT[len(runtime.CURRENT_PATH)]
 
-            # Finaly, we ask the user to choose the item number
+            # Else we ask the user to choose the next item number
             else:
                 # We wait the user input
                 try:

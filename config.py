@@ -1,11 +1,33 @@
 # -*- coding: utf-8 -*-
-
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
-
 import os
+import argparse
+
+parser = argparse.ArgumentParser(description='Catch-up TV & More simulator')
+
+parser.add_argument('-a', '--addon-path', default='', help='Path of plugin.video.catchuptvandmore')
+parser.add_argument('-c', '--config-file', default='', help='Optionnal JSON config file (CLI args take precedence over the config file)')
+parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
+parser.add_argument('--auto-select', default='', help='Auto select items from root menu, separate items with dashes (e.g. \'1-2-1-13\')')
+parser.add_argument('--exit-on-error', action='store_true', help='Quit simulator at the first error encountered')
+parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video slection')
+parser.add_argument('--kodi-version', default='LEIA', choices=['LEIA', 'KRYPTON', 'JARVIS'], help='Kodi version to simulate [LEIA]')
+
+
+log_group = parser.add_argument_group('Logging')
+log_group.add_argument('--disable-kodi-log', action='store_true', help='Disable stdout Kodi logging')
+log_group.add_argument('--kodi-log-level', type=int, help='Minimum Kodi log level to be logging')
+log_group.add_argument('--disable-xbmcaddon-mock-log', action='store_true', help='Disable log messages of xbmcaddon module functions calls')
+log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')
+
+
+auto_exploration_group = parser.add_argument_group('Auto exploration mode')
+auto_exploration_group.add_argument('--auto-exploration', action='store_true', help='Enable auto exploration of addon menus')
+auto_exploration_group.add_argument('--entry-points', default='[1]', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'[1], [1-2-1]\')')
+auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
+auto_exploration_group.add_argument('--wait-time', type=int, default=1, help='Time to wait between each menu during exploration [1sec]')
+
+
+parser.parse_args()
 
 # Here you can customize your simulator behavior and your personal configuration
 
@@ -35,7 +57,7 @@ When set to True, you can see log
 messages when a fake Kodi API
 function of xbmcaddon module is called
 """
-ENABLE_MOCK_XBMCADDON_LOG = True
+ENABLE_MOCK_XBMCADDON_LOG = False
 
 
 """
@@ -43,7 +65,7 @@ When set to True, you can see log
 message when a fake Kodi API
 function of xbmc module is called
 """
-ENABLE_MOCK_XBMC_LOG = True
+ENABLE_MOCK_XBMC_LOG = False
 
 
 """

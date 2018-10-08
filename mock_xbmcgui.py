@@ -67,8 +67,6 @@ class FakeListItem(object):
         self._context_menu = items
 
 
-
-
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.ListItem.side_effect = FakeListItem
 

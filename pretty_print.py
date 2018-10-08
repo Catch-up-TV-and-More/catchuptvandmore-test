@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
-
-
 import config
 import runtime
 import common
@@ -40,6 +34,7 @@ def check_image(path):
         from_internet = True
 
         # We need to download it and check it
+        # TODO Do not download picture but just check return code
         r = urlquick.get(path)
         if r.status_code != 200:
             valid_image = False
@@ -62,14 +57,14 @@ def check_image(path):
         except Exception:
             valid_image = False
 
-    image_pp = u''
+    image_pp = ''
 
     if from_internet:
         image_pp += WEB
     else:
         image_pp += COMPUTER
 
-    image_pp += u' '
+    image_pp += ' '
 
     if is_addon_icon or is_addon_fanart:
         image_pp += TV
@@ -82,9 +77,6 @@ def check_image(path):
 
 
 def truncate_string(column, string):
-    if isinstance(string, str):
-        string = string.decode('utf-8')
-
     max_size = compute_column_size(column) - 1
     string_len = len(string)
 
@@ -98,9 +90,9 @@ def truncate_string(column, string):
 
 
 def compute_column_size(column):
-    if column == u'label':
+    if column == 'label':
         return int(config.CONSOLE_SIZE / 5)
-    if column == u'plot':
+    if column == 'plot':
         return int(config.CONSOLE_SIZE / 4)
     raise Exception(
         'Unknown column name: ' + column)
@@ -122,45 +114,44 @@ def format_item(item, cnt):
     label_pp = truncate_string('label', listitem.getLabel())
 
     # Plot
-    plot_pp = u''
+    plot_pp = ''
     if 'video' in listitem._info and 'plot' in listitem._info['video']:
         plot_pp = truncate_string('plot', listitem._info['video']['plot'])
 
     # Thumb
-    thumb_pp = u''
+    thumb_pp = ''
     if 'thumb' in listitem._art:
         thumb_pp = check_image(listitem._art['thumb'])
     else:
         thumb_pp = RED_RING
 
     # Fanart
-    fanart_pp = u''
+    fanart_pp = ''
     if 'fanart' in listitem._art:
         fanart_pp = check_image(listitem._art['fanart'])
     else:
         fanart_pp = RED_RING
 
     # Duration
-    duration_pp = u''
+    duration_pp = ''
     if 'video' in listitem._info and 'duration' in listitem._info['video']:
         duration_sec = listitem._info['video']['duration']
         if duration_sec < 60:
-            duration_pp = unicode(str(duration_sec) + ' s', 'utf-8')
+            duration_pp = str(duration_sec) + ' s'
         else:
             hours = duration_sec // 3600
             duration_sec = duration_sec - (hours * 3600)
             minutes = duration_sec // 60
             seconds = duration_sec - (minutes * 60)
             if hours == 0:
-                duration_pp = unicode(str(minutes) + ':' + str(seconds), 'utf-8')
+                duration_pp = str(minutes) + ':' + str(seconds)
             else:
-                duration_pp = unicode(str(hours) + ':' + str(minutes) + ':' + str(seconds), 'utf-8')
+                duration_pp = str(hours) + ':' + str(minutes) + ':' + str(seconds)
 
     # Date
-    date_pp = u''
+    date_pp = ''
     if 'video' in listitem._info and 'date' in listitem._info['video']:
         date_pp = listitem._info['video']['date']
-
 
 
     '''
@@ -193,7 +184,7 @@ def format_item(item, cnt):
     '''
 
     return {
-        'key': unicode(str(cnt), 'utf-8'),
+        'key': str(cnt),
         'type': type_pp,
         'label': label_pp,
         'plot': plot_pp,
@@ -210,14 +201,14 @@ def print_formated_listing(items):
     listing_array = []
 
     first_line = {
-        'key': u'',
-        'type': u'',
-        'label': u'Label',
-        'plot': u'Plot',
-        'thumb': u'Thumb',
-        'fanart': u'Fanart',
-        'duration': u'Time',
-        'date': u'Date'
+        'key': '',
+        'type': '',
+        'label': 'Label',
+        'plot': 'Plot',
+        'thumb': 'Thumb',
+        'fanart': 'Fanart',
+        'duration': 'Time',
+        'date': 'Date'
 
     }
 
@@ -225,14 +216,14 @@ def print_formated_listing(items):
 
     if len(runtime.CURRENT_PATH) > 1:
         previous_line = {
-            'key': unicode(str(0), 'utf-8'),
+            'key': str(0),
             'type': LEFT_ARROW,
-            'label': u'Previous menu',
-            'plot': u'',
-            'thumb': u'',
-            'fanart': u'',
-            'duration': u'',
-            'date': u''
+            'label': 'Previous menu',
+            'plot': '',
+            'thumb': '',
+            'fanart': '',
+            'duration': '',
+            'date': ''
         }
         listing_array.append(previous_line)
 
@@ -247,16 +238,7 @@ def print_formated_listing(items):
         if i == 0:
             print(dash)
 
-        # print(repr(listing_array[i]['key']))
-        # print(repr(listing_array[i]['type']))
-        # print(repr(listing_array[i]['label']))
-        # print(repr(listing_array[i]['plot']))
-        # print(repr(listing_array[i]['duration']))
-        # print(repr(listing_array[i]['date']))
-        # print(repr(listing_array[i]['thumb']))
-        # print(repr(listing_array[i]['fanart']))
-
-        print((u'{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{date_size}}{:{thumb_size}}{:{fanart_size}}'.format(
+        print('{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{date_size}}{:{thumb_size}}{:{fanart_size}}'.format(
             listing_array[i]['key'],
             listing_array[i]['type'],
             listing_array[i]['label'],
@@ -273,7 +255,7 @@ def print_formated_listing(items):
             fanart_size=6,
             duration_size=8,
             date_size=12
-        )).encode('utf-8'))
+        ))
 
         if i == 0:
             print(dash)
@@ -289,7 +271,7 @@ def current_path_pp(path):
             path_pp += ' ' + RIGHT_ARROW + ' '
         path_pp += i['label'] + ' (' + str(i['key']) + ')'
         cnt += 1
-    return path_pp.encode('utf-8')
+    return path_pp
 
 
 def print_encountered_errors():
