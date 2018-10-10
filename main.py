@@ -3,7 +3,12 @@
 
 import sys
 import mock
-import importlib
+try:
+    reload
+except NameError:
+    # Python 3
+    from imp import reload
+
 import subprocess
 import bridge
 import time
@@ -18,6 +23,7 @@ import mock_xbmcaddon
 import mock_xbmc
 import mock_xbmcplugin
 import mock_xbmcgui
+import mock_xbmcvfs
 import mock_youtube_dl
 
 
@@ -36,8 +42,12 @@ print('')
 # Add codequick module to python path
 sys.path.append(common.CODEQUICK_PATH)
 
+# Add inputstreamhelper module to python path
+sys.path.append(common.INPUTSTREAMHELPER_PATH)
+
 # Add Catch-up TV & More module to python path
 sys.path.append(CONFIG['addon_path'])
+
 
 # And import Catch-up TV & More module
 import addon
@@ -69,7 +79,7 @@ while(True):
         # We need to reload the addon module in order to be able
         # to modify the source code of the addon on the fly
         # (usefull during dev)
-        importlib.reload(addon)
+        reload(addon)
 
         # Now we simulate the addon execution
         addon.main()

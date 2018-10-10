@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import unicode_literals
 from config import CONFIG
 import runtime
 import common
+import sys
 
 import imghdr
 import urlquick
@@ -23,6 +24,12 @@ BACK_ARROW = u'\U0001F519'
 LEFT_ARROW_CURVING_RIGHT = u'\U000021AA'
 
 
+def to_unicode(s):
+    if isinstance(s, str) and sys.version_info < (3, 0):
+        return s.decode('utf-8')
+    return s
+
+
 def check_image(path):
     # First we need to check if image is local or from internet
     from_internet = False
@@ -33,15 +40,10 @@ def check_image(path):
     if 'http' in path:
         from_internet = True
 
-        # We need to download it and check it
-        # TODO Do not download picture but just check return code
-        r = urlquick.get(path)
-        if r.status_code != 200:
+        # We need to check the status code without download the image
+        r = urlquick.head(path)
+        if r.headers['content-type'] != 'image/jpeg':
             valid_image = False
-        else:
-            # Tempo avant de vérifier avec imghr
-            pass
-
     else:
         try:
             result = imghdr.what(path)
@@ -77,6 +79,7 @@ def check_image(path):
 
 
 def truncate_string(column, string):
+    string = to_unicode(string)
     max_size = compute_column_size(column) - 1
     string_len = len(string)
 
@@ -116,7 +119,8 @@ def format_item(item, cnt):
     # Plot
     plot_pp = ''
     if 'video' in listitem._info and 'plot' in listitem._info['video']:
-        plot_pp = truncate_string('plot', listitem._info['video']['plot'])
+        plot_pp = truncate_string('plot', (listitem._info['video']['plot']))
+        plot_pp = plot_pp.replace('\n', ' ').replace('\r', '')
 
     # Thumb
     thumb_pp = ''
@@ -184,14 +188,14 @@ def format_item(item, cnt):
     '''
 
     return {
-        'key': str(cnt),
-        'type': type_pp,
-        'label': label_pp,
-        'plot': plot_pp,
-        'thumb': thumb_pp,
-        'fanart': fanart_pp,
-        'duration': duration_pp,
-        'date': date_pp
+        'key': to_unicode(str(cnt)),
+        'type': to_unicode(type_pp),
+        'label': to_unicode(label_pp),
+        'plot': to_unicode(plot_pp),
+        'thumb': to_unicode(thumb_pp),
+        'fanart': to_unicode(fanart_pp),
+        'duration': to_unicode(duration_pp),
+        'date': to_unicode(date_pp)
     }
 
 
@@ -238,7 +242,26 @@ def print_formated_listing(items):
         if i == 0:
             print(dash)
 
-        print('{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{date_size}}{:{thumb_size}}{:{fanart_size}}'.format(
+
+        # print(repr(listing_array[i]['key']))
+        # print(u'{}'.format(listing_array[i]['key']))
+        # print(repr(listing_array[i]['type']))
+        # print(u'{}'.format(listing_array[i]['type']))
+        # print(repr(listing_array[i]['label']))
+        # print(u'{}'.format(listing_array[i]['label']))
+        # print(repr(listing_array[i]['plot']))
+        # print(u'{}'.format(listing_array[i]['plot']))
+        # print(repr(listing_array[i]['duration']))
+        # print(u'{}'.format(listing_array[i]['duration']))
+        # print(repr(listing_array[i]['date']))
+        # print(u'{}'.format(listing_array[i]['date']))
+        # print(repr(listing_array[i]['thumb']))
+        # print(u'{}'.format(listing_array[i]['thumb']))
+        # print(repr(listing_array[i]['fanart']))
+        # print(u'{}'.format(listing_array[i]['fanart']))
+
+
+        print(u'{:{key_size}}{:{type_size}}{:{label_size}} {:{plot_size}} {:{duration_size}}{:{date_size}}{:{thumb_size}}{:{fanart_size}}'.format(
             listing_array[i]['key'],
             listing_array[i]['type'],
             listing_array[i]['label'],

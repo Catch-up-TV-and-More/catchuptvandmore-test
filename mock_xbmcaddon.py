@@ -7,32 +7,38 @@ from config import *
 
 ADDONS_SETTINGS = {
     'plugin.video.catchuptvandmore': ADDON_FAKE_SETTINGS,
-    'script.module.codequick': CODEQUICK_FAKE_SETTINGS
+    'script.module.codequick': CODEQUICK_FAKE_SETTINGS,
+    'script.module.inputstreamhelper': INPUTSTREAMHELPER_FAKE_SETTINGS
 }
 
 ADDONS_LABELS = {
     'plugin.video.catchuptvandmore': ADDON_FAKE_LABELS,
-    'script.module.codequick': CODEQUICK_FAKE_LABELS
+    'script.module.codequick': CODEQUICK_FAKE_LABELS,
+    'script.module.inputstreamhelper': INPUTSTREAMHELPER_FAKE_LABELS
 }
 
 ADDONS_NAME = {
     'plugin.video.catchuptvandmore': 'Catch-up TV & More',
-    'script.module.codequick': 'CodeQuick'
+    'script.module.codequick': 'CodeQuick',
+    'script.module.inputstreamhelper': 'InputStream Helper'
 }
 
 ADDONS_PATHS = {
     'plugin.video.catchuptvandmore': CONFIG['addon_path'],
-    'script.module.codequick': common.CODEQUICK_ADDON_PATH
+    'script.module.codequick': common.CODEQUICK_ADDON_PATH,
+    'script.module.inputstreamhelper': common.INPUTSTREAMHELPER_ADDON_PATH
 }
 
 ADDONS_FANARTS = {
     'plugin.video.catchuptvandmore': common.ADDON_FANART_PATHFILE,
-    'script.module.codequick': common.CODEQUICK_FANART_PATHFILE
+    'script.module.codequick': common.CODEQUICK_FANART_PATHFILE,
+    'script.module.inputstreamhelper': common.INPUTSTREAMHELPER_FANART_PATHFILE
 }
 
 ADDONS_ICONS = {
     'plugin.video.catchuptvandmore': common.ADDON_ICON_PATHFILE,
-    'script.module.codequick': common.CODEQUICK_ICON_PATHFILE
+    'script.module.codequick': common.CODEQUICK_ICON_PATHFILE,
+    'script.module.inputstreamhelper': common.INPUTSTREAMHELPER_ICON_PATHFILE
 }
 
 
