@@ -13,6 +13,7 @@ parser.add_argument('--exit-on-error', action='store_true', help='Quit simulator
 parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video slection')
 parser.add_argument('--kodi-version', default='LEIA', choices=['LEIA', 'KRYPTON', 'JARVIS'], help='Kodi version to simulate [LEIA]')
 parser.add_argument('--print-all-explored-items', action='store_true', help='Print all explored items when exit the simulator')
+parser.add_argument('--disable-image-check', action='store_true', help='Do not check image URL')
 
 
 log_group = parser.add_argument_group('Logging')
@@ -70,6 +71,9 @@ if 'kodi_version' in CONFIG_JSON and CONFIG['kodi_version'] == 'LEIA':
 
 if 'print_all_explored_items' in CONFIG_JSON and CONFIG['print_all_explored_items'] is False:
     CONFIG['print_all_explored_items'] = CONFIG_JSON['print_all_explored_items']
+
+if 'disable_image_check' in CONFIG_JSON and CONFIG['disable_image_check'] is False:
+    CONFIG['disable_image_check'] = CONFIG_JSON['disable_image_check']
 
 if 'disable_kodi_log' in CONFIG_JSON and CONFIG['disable_kodi_log'] is False:
     CONFIG['disable_kodi_log'] = CONFIG_JSON['disable_kodi_log']

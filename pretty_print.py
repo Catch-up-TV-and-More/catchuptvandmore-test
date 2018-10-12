@@ -40,10 +40,14 @@ def check_image(path):
     if 'http' in path:
         from_internet = True
 
-        # We need to check the status code without download the image
-        r = urlquick.head(path)
-        if r.headers['content-type'] != 'image/jpeg':
+        if not CONFIG['disable_image_check']:
+            # We need to check the status code without download the image
+            r = urlquick.head(path)
+            if r.headers['content-type'] != 'image/jpeg':
+                valid_image = False
+        else:
             valid_image = False
+
     else:
         try:
             result = imghdr.what(path)
@@ -292,9 +296,9 @@ def current_path_pp(path):
     for i in path:
         if cnt != 0:
             path_pp += ' ' + RIGHT_ARROW + ' '
-        path_pp += i['label'] + ' (' + str(i['key']) + ')'
+        path_pp += to_unicode(i['label']) + ' (' + to_unicode(str(i['key'])) + ')'
         cnt += 1
-    return path_pp
+    return to_unicode(path_pp)
 
 
 def print_encountered_errors():
@@ -303,10 +307,10 @@ def print_encountered_errors():
         print('Encountered errors list:')
         cnt = 0
         for error in runtime.ALL_REPORTED_ERROR:
-            print('\n\t* Error ', cnt)
-            print('\t\t- Type: ', error['type'])
-            print('\t\t- Parent path: ', error['path'])
-            print('\t\t- Route: ', error['route'])
-            print('\t\t- Params: ', error['params'])
+            print(u'\n\t* Error %s' % cnt)
+            print(u'\t\t- Type: %s' % error['type'])
+            print(u'\t\t- Parent path: %s' % error['path'])
+            print(u'\t\t- Route: %s' % error['route'])
+            print(u'\t\t- Params: %s' % error['params'])
 
             cnt += 1

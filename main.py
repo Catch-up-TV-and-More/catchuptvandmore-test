@@ -79,7 +79,13 @@ while(True):
         # We need to reload the addon module in order to be able
         # to modify the source code of the addon on the fly
         # (usefull during dev)
+        for k, v in sys.modules.items():
+            # print(str(k) + ' :: ' + str(v))
+            if 'plugin.video.catchuptvandmore' in str(v) and \
+                    'plugin.video.catchuptvandmore/addon.py' not in str(v):
+                reload(v)
         reload(addon)
+        # TODO: ne pas recharger addon dans la boucle
 
         # Now we simulate the addon execution
         addon.main()
@@ -134,7 +140,7 @@ while(True):
                         'params': bridge.TRIGGER_ERROR_PARAMS
                     })
 
-                    if config.EXIT_IF_ERROR:
+                    if CONFIG['exit_on_error']:
                         next_item = -1
 
         # We are in a basic menu case
@@ -177,10 +183,6 @@ while(True):
             # If we are in auto exploration mode
             if CONFIG['auto_exploration']:
 
-                # First we wait a fake time
-                sys.stdout.flush()
-                time.sleep(config.SLEEP_TIME)
-
                 add_items_of_the_current_menu = True
 
                 # If we already seen this menu
@@ -205,11 +207,16 @@ while(True):
                     elif current_path_l == entry_point:
                         # We just reach the entry point,
                         # we can start auto exploration
-                        config.ENTRY_POINTS_TO_EXPLORE.pop()
+                        CONFIG['entry_points'].pop()
                         runtime.PATH_TO_REACH = False
                     else:
                         print('Error: On ne devrait pas etre là ...')
                         exit(-1)
+
+                else:
+                    # We wait a fake time
+                    sys.stdout.flush()
+                    time.sleep(CONFIG['wait_time'])
 
                 # Now we can add the current menu items to the stack to explore
                 if add_items_of_the_current_menu:
@@ -227,14 +234,14 @@ while(True):
                             runtime.ITEMS_TO_EXPLORE.append(new_path_l)
                             cnt += 1
 
-                        if cnt >= config.MAX_ITEMS_NUMBER_PER_MENU:
+                        if cnt >= CONFIG['max_items_per_menu']:
                             break
 
                 if next_item == -2:
 
                     if not runtime.ITEMS_TO_EXPLORE and not runtime.PATH_TO_REACH:
                         # If there is no more EP to explore
-                        if not config.ENTRY_POINTS_TO_EXPLORE:
+                        if not CONFIG['entry_points']:
                             next_item = -1
                         else:
                             runtime.PATH_TO_REACH = True
@@ -250,7 +257,7 @@ while(True):
                             runtime.ITEMS_TO_EXPLORE.pop()
                             next_item = item_to_explore[-1]
 
-                if len(ITEMS_ALREADY_EXPLORED) >= config['max_items_to_explore']:
+                if len(runtime.ITEMS_ALREADY_EXPLORED) >= CONFIG['max_items_to_explore'] and CONFIG['max_items_to_explore'] != -1:
                     print('Max items to explore reached')
                     next_item = -1
 
@@ -266,7 +273,7 @@ while(True):
                 try:
                     sys.stdout.flush()
                     next_item = int(input('Next item to select? \n'))
-                except ValueError:
+                except Exception:
                     pass
                 print('')
 

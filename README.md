@@ -72,6 +72,10 @@ The information below use the CLI format but you can easily find the correspondi
 * **--print-all-explored-items**:
     * Print all explored items when exit the simulator
 
+* **--disable-image-check**:
+    * Do not check each image/fanart URL to speed up similation
+
+
 ### Logging
 
 * **--disable-kodi-log**:
