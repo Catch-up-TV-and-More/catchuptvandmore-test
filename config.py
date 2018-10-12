@@ -29,6 +29,7 @@ auto_exploration_group.add_argument('--entry-points', default='1', help='By defa
 auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
 auto_exploration_group.add_argument('--wait-time', type=int, default=1, help='Time to wait between each menu during exploration [1sec]')
 auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
+auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
 
 
 CONFIG_CLI = vars(parser.parse_args())
@@ -101,6 +102,9 @@ if 'wait_time' in CONFIG_JSON and CONFIG['wait_time'] == 1:
 
 if 'max_items_to_explore' in CONFIG_JSON and CONFIG['max_items_to_explore'] == -1:
     CONFIG['max_items_to_explore'] = CONFIG_JSON['max_items_to_explore']
+
+if 'exploration_strategy' in CONFIG_JSON and CONFIG['exploration_strategy'] == 'RANDOM':
+    CONFIG['exploration_strategy'] = CONFIG_JSON['exploration_strategy']
 
 
 # We get the full path of the addon path

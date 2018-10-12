@@ -104,7 +104,7 @@ The information below use the CLI format but you can easily find the correspondi
   * By default the auto exploration starts from the root menu but you can specify one or more entry points of the addon to start the auto exploration (e.g. 1, 1-2-1, 1-3-4-1)
 
 * **--max-items-per-menu INT**:
-  * During the exploration, for each new menu explored, only add *max-items-per-menu* items to the paths to explore stack.
+  * During the exploration, for each new menu explored, only add *max-items-per-menu* items to the paths to explore stack. If not set, add all the items of the menu
 
 * **--wait-time INT**:
     * Time to wait between each explored menu. To simulate an "human" usage...
@@ -112,6 +112,12 @@ The information below use the CLI format but you can easily find the correspondi
 
 * **--max-items-to-explore INT**:
     * If the total number of item explored reach this value then stop the exploration
+
+* **--exploration-strategy STRING**:
+    * For each explored menu, this method says how to add items of the current menu in the stack of item to explore
+        * FIRST: Add the "max-items-per-menu" first items of the menu
+        * LAST: Add the "max-items-per-menu" last items of the menu
+        * RANDOM (default): Add "max-items-per-menu" random items of the menu
 
 
 ### Addon settings and labels

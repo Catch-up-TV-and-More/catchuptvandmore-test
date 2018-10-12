@@ -18,6 +18,7 @@ from config import CONFIG
 import common
 import runtime
 from pretty_print import *
+from random import randint
 
 import mock_xbmcaddon
 import mock_xbmc
@@ -221,21 +222,31 @@ while(True):
                 # Now we can add the current menu items to the stack to explore
                 if add_items_of_the_current_menu:
 
-                    # TODO: Add strategy modes (RANDOM, FIRSTS, LASTS)
-                    cnt = 0
-                    for i in reversed(range(len(items))):
-                        item = items[i]
+                    max_index = len(items)
+                    if CONFIG['max_items_per_menu'] != -1 and CONFIG['max_items_per_menu'] < max_index:
+                        max_index = CONFIG['max_items_per_menu']
+
+                    if CONFIG['exploration_strategy'] == 'FIRST':
+                        iterator = reversed(range(1, max_index + 1))
+                    elif CONFIG['exploration_strategy'] == 'LAST':
+                        iterator = reversed(range(len(items) - max_index + 1, len(items) + 1))
+                    elif CONFIG['exploration_strategy'] == 'RANDOM':
+                        iterator = []
+                        while len(iterator) != max_index:
+                            r = randint(1, len(items))
+                            if r not in iterator:
+                                iterator.append(r)
+
+                    for i in iterator:
+                        print('I: ' + str(i))
+                        item = items[i - 1]
 
                         new_path_l = list(current_path_l)
-                        new_path_l.append(i + 1)
+                        new_path_l.append(i)
                         new_path_t = tuple(new_path_l)
 
                         if new_path_t not in runtime.ITEMS_ALREADY_EXPLORED:
                             runtime.ITEMS_TO_EXPLORE.append(new_path_l)
-                            cnt += 1
-
-                        if cnt >= CONFIG['max_items_per_menu']:
-                            break
 
                 if next_item == -2:
 
