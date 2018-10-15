@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import unicode_literals
 import sys
 import mock
 import common
@@ -71,17 +71,17 @@ class FakeAddon(object):
                 'Need to complete getAddonInfo mock for info_id: ' + info_id)
 
         if not CONFIG['disable_xbmcaddon_mock_log']:
-            print('[FakeAddon] getAddonInfo of "' + info_id + '" --> "' + result + '"')
+            print('[FakeAddon] getAddonInfo of "' + common.to_unicode(info_id) + '" --> "' + common.to_unicode(result) + '"')
         return result
 
     def getSetting(self, setting_id):
         if not CONFIG['disable_xbmcaddon_mock_log']:
-            print('[FakeAddon] getSetting of "' + setting_id + '" --> "' + self._settings.get(setting_id, '') + '"')
+            print('[FakeAddon] getSetting of "' + common.to_unicode(setting_id) + '" --> "' + common.to_unicode(self._settings.get(setting_id, '')) + '"')
         return self._settings.get(setting_id, '')
 
     def setSetting(self, _id, value):
         if not CONFIG['disable_xbmcaddon_mock_log']:
-            print('[FakeAddon] setSetting of "' + _id + '" --> "' + value + '"')
+            print('[FakeAddon] setSetting of "' + common.to_unicode(_id) + '" --> "' + common.to_unicode(value) + '"')
         self._settings[_id] = value
 
     def getLocalizedString(self, id_):

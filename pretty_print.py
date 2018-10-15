@@ -24,11 +24,6 @@ BACK_ARROW = u'\U0001F519'
 LEFT_ARROW_CURVING_RIGHT = u'\U000021AA'
 
 
-def to_unicode(s):
-    if isinstance(s, str) and sys.version_info < (3, 0):
-        return s.decode('utf-8')
-    return s
-
 
 def check_image(path):
     # First we need to check if image is local or from internet
@@ -36,6 +31,7 @@ def check_image(path):
     valid_image = True
     is_addon_icon = False
     is_addon_fanart = False
+    path = common.to_unicode(path)
 
     if 'http' in path:
         from_internet = True
@@ -83,7 +79,7 @@ def check_image(path):
 
 
 def truncate_string(column, string):
-    string = to_unicode(string)
+    string = common.to_unicode(string)
     max_size = compute_column_size(column) - 1
     string_len = len(string)
 
@@ -192,14 +188,14 @@ def format_item(item, cnt):
     '''
 
     return {
-        'key': to_unicode(str(cnt)),
-        'type': to_unicode(type_pp),
-        'label': to_unicode(label_pp),
-        'plot': to_unicode(plot_pp),
-        'thumb': to_unicode(thumb_pp),
-        'fanart': to_unicode(fanart_pp),
-        'duration': to_unicode(duration_pp),
-        'date': to_unicode(date_pp)
+        'key': common.to_unicode(str(cnt)),
+        'type': common.to_unicode(type_pp),
+        'label': common.to_unicode(label_pp),
+        'plot': common.to_unicode(plot_pp),
+        'thumb': common.to_unicode(thumb_pp),
+        'fanart': common.to_unicode(fanart_pp),
+        'duration': common.to_unicode(duration_pp),
+        'date': common.to_unicode(date_pp)
     }
 
 
@@ -296,9 +292,9 @@ def current_path_pp(path):
     for i in path:
         if cnt != 0:
             path_pp += ' ' + RIGHT_ARROW + ' '
-        path_pp += to_unicode(i['label']) + ' (' + to_unicode(str(i['key'])) + ')'
+        path_pp += common.to_unicode(i['label']) + ' (' + common.to_unicode(str(i['key'])) + ')'
         cnt += 1
-    return to_unicode(path_pp)
+    return common.to_unicode(path_pp)
 
 
 def print_encountered_errors():

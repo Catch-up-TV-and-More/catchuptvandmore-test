@@ -27,9 +27,11 @@ auto_exploration_group = parser.add_argument_group('Auto exploration mode')
 auto_exploration_group.add_argument('--auto-exploration', action='store_true', help='Enable auto exploration of addon menus')
 auto_exploration_group.add_argument('--entry-points', default='1', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'1, 1-2-1\')')
 auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
-auto_exploration_group.add_argument('--wait-time', type=int, default=1, help='Time to wait between each menu during exploration [1sec]')
+auto_exploration_group.add_argument('--wait-time', type=float, default=1.0, help='Time to wait between each menu during exploration [1sec]')
 auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
 auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
+auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore')
+
 
 
 CONFIG_CLI = vars(parser.parse_args())
@@ -105,6 +107,9 @@ if 'max_items_to_explore' in CONFIG_JSON and CONFIG['max_items_to_explore'] == -
 
 if 'exploration_strategy' in CONFIG_JSON and CONFIG['exploration_strategy'] == 'RANDOM':
     CONFIG['exploration_strategy'] = CONFIG_JSON['exploration_strategy']
+
+if 'max_depth' in CONFIG_JSON and CONFIG['max_depth'] == -1:
+    CONFIG['max_depth'] = CONFIG_JSON['max_depth']
 
 
 # We get the full path of the addon path

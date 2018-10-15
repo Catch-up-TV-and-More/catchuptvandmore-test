@@ -24,7 +24,17 @@ def fake_add_directory_items(handle, items, totalItems=0):
 
 
 def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDisc=True):
-    pass
+    if 'menu' not in runtime.CURRENT_PATH[-1]:
+        runtime.CURRENT_PATH[-1]['menu'] = {}
+    if succeeded:
+        runtime.CURRENT_PATH[-1]['menu']['succeeded'] = True
+    else:
+        runtime.CURRENT_PATH[-1]['menu']['succeeded'] = False
+    if updateListing:
+        runtime.CURRENT_PATH[-1]['menu']['update_listing'] = True
+    else:
+        runtime.CURRENT_PATH[-1]['menu']['update_listing'] = False
+
 
 
 def fake_set_resolve_url(handle, succeeded, listitem):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 from config import CONFIG
 
 CWD_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -18,3 +19,9 @@ INPUTSTREAMHELPER_PATH = os.path.join(CWD_PATH, 'script.module.inputstreamhelper
 INPUTSTREAMHELPER_ADDON_PATH = os.path.join(CWD_PATH, 'script.module.inputstreamhelper')
 INPUTSTREAMHELPER_FANART_PATHFILE = os.path.join(INPUTSTREAMHELPER_ADDON_PATH, 'fanart.jpg')
 INPUTSTREAMHELPER_ICON_PATHFILE = os.path.join(INPUTSTREAMHELPER_ADDON_PATH, 'icon.png')
+
+
+def to_unicode(s):
+    if isinstance(s, str) and sys.version_info < (3, 0):
+        return s.decode('utf-8')
+    return s

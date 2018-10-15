@@ -45,6 +45,28 @@ def get_localized_string(id_):
     return result
 
 
+class FakeKeyboard(object):
+    def __init__(self, line="", heading="", hidden=False):
+        pass
+
+    def doModal(self, autoclose=0):
+        pass
+
+    def getText(self):
+        if CONFIG['auto_exploration']:
+            return "Chien"
+        else:
+            try:
+                entry = raw_input("Kodi keyboard entry: ")
+                return entry
+            except Exception:
+                return ""
+
+    def isConfirmed(self):
+        return True
+
+
+
 mock_xbmc = mock.MagicMock()
 
 mock_xbmc.log.side_effect = fake_log
@@ -61,6 +83,8 @@ mock_xbmc.LOGWARNING = LOGWARNING
 mock_xbmc.translatePath.side_effect = fake_translate_path
 mock_xbmc.getLocalizedString.side_effect = get_localized_string
 mock_xbmc.getInfoLabel.side_effect = fake_get_info_label
+
+mock_xbmc.Keyboard.side_effect = FakeKeyboard
 
 # Say to Python that the xbmc module is mock_xbmc
 sys.modules['xbmc'] = mock_xbmc

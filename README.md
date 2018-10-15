@@ -106,7 +106,7 @@ The information below use the CLI format but you can easily find the correspondi
 * **--max-items-per-menu INT**:
   * During the exploration, for each new menu explored, only add *max-items-per-menu* items to the paths to explore stack. If not set, add all the items of the menu
 
-* **--wait-time INT**:
+* **--wait-time FLOAT**:
     * Time to wait between each explored menu. To simulate an "human" usage...
     * Default value: 1 second
 
@@ -118,6 +118,9 @@ The information below use the CLI format but you can easily find the correspondi
         * FIRST: Add the "max-items-per-menu" first items of the menu
         * LAST: Add the "max-items-per-menu" last items of the menu
         * RANDOM (default): Add "max-items-per-menu" random items of the menu
+
+* **--max-depth INT**:
+    * To set the maximum allowed level to explore (usefull when there is a lot of "Next page")
 
 
 ### Addon settings and labels

@@ -292,8 +292,12 @@ class Dispatcher(object):
             dialog.notification(e.__class__.__name__, str(e), addon_data.getAddonInfo("icon"))
             logger.critical(str(e), exc_info=1)
 
-            # Hack perso
-            bridge.LAST_MENU_TRIGGER_ERROR = True
+            print 'TOTO' + str(e) + 'TOTO'
+            if str(e) != 'No items found':
+                # Hack perso
+                bridge.LAST_MENU_TRIGGER_ERROR = True
+
+
 
         else:
             from . import start_time
