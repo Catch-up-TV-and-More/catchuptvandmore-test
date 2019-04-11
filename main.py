@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
+print(str(sys.argv))
+
 import mock
 try:
     reload
