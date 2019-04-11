@@ -148,7 +148,9 @@ The information below use the CLI format but you can easily find the correspondi
 
 
 
+## Modules needed
 
+* urlquick
 
 
 

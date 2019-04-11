@@ -45,7 +45,7 @@ if CONFIG_CLI['config_file'] != '':
 
         # Check json dict
         for k in CONFIG_JSON.keys():
-            if k not in CONFIG_CLI:
+            if k not in CONFIG_CLI and k != '_comment':
                 raise Exception('The key "' + k + '" in your json file is invalid')
 
 
@@ -154,6 +154,8 @@ ADDON_FAKE_SETTINGS = {
     "replay.order": "2",
     "websites": "true",
     "websites.order": "3",
+    "favourites": "true",
+    "favourites.order": "4",
 
     # Countries
 
@@ -783,6 +785,7 @@ ADDON_FAKE_LABELS = {
     30714: 'Search videos',
     30715: 'Search programs',
     30716: 'Video stream is not available',
+    30803: 'Favourites'
 }
 
 

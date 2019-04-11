@@ -256,7 +256,7 @@ while(True):
                     else:
                         print('Max depth reached')
                         # TEMPO
-                        exit(-1)
+                        break
 
                 if next_item == -2:
 

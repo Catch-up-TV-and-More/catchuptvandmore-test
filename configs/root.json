@@ -1,0 +1,19 @@
+{
+
+    "_comment": "Config file to open addon and exit",
+
+    "addon_path": "../plugin.video.catchuptvandmore",
+    "exit_on_error": true,
+    "disable_video_player": true,
+    "kodi_version": "LEIA",
+    "print_all_explored_items": true,
+
+    "disable_image_check": true,
+
+    "auto_exploration": true,
+    "entry_points": "1",
+    "max_items_to_explore": -1,
+    "wait_time": 0,
+    "exploration_strategy": "FIRST",
+    "max_depth": 1
+}

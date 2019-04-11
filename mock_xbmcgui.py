@@ -10,6 +10,22 @@ import sys
 import mock
 
 
+class FakeWindow(object):
+    def __init__(self, existingWindowId=-1):
+        # type: (int) -> None
+        self.dict = {}
+
+    def setProperty(self, key, value):
+        self.dict[key] = value
+
+    def getProperty(self, key):
+        return self.dict[key]
+
+    def clearProperty(self, key):
+        # type: (str) -> None
+        pass
+
+
 class FakeListItem(object):
     def __init__(self, label="", label2="", iconImage="", thumbnailImage="", path=""):
         self._label = label
@@ -69,6 +85,7 @@ class FakeListItem(object):
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.ListItem.side_effect = FakeListItem
+mock_xbmcgui.Window.side_effect = FakeWindow
 
 # Say to Python that the xbmcgui module is mock_xbmcgui
 sys.modules['xbmcgui'] = mock_xbmcgui

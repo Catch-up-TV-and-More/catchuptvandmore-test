@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-# HACK
-import bridge
-
 # Standard Library Imports
 import binascii
 import logging
@@ -19,7 +16,7 @@ import xbmcgui
 import xbmc
 
 # Package imports
-from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3
+from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3, unicode_type
 
 script_data = xbmcaddon.Addon("script.module.codequick")
 addon_data = xbmcaddon.Addon()
@@ -101,6 +98,9 @@ class Route(object):
     :ivar str path: The route path to func/class.
     """
     __slots__ = ("parent", "function", "callback", "path", "is_playable", "is_folder")
+
+    def __eq__(self, other):
+        return self.path == other.path
 
     def __init__(self, callback, parent, path):
         # Register a class callback
@@ -206,6 +206,7 @@ class Dispatcher(object):
         kodi_logger.debug_msgs = []
         self.selector = "root"
         self.params.clear()
+        auto_sort.clear()
 
     def parse_args(self):
         """Extract arguments given by Kodi"""
@@ -241,7 +242,7 @@ class Dispatcher(object):
         # Construct route path
         path = callback.__name__.lower()
         if path != "root":
-            path = "/{}/{}".format(callback.__module__.strip("_").replace(".", "/"), callback.__name__).lower()
+            path = "/{}/{}/".format(callback.__module__.strip("_").replace(".", "/"), callback.__name__).lower()
 
         # Register callback
         if path in self.registered_routes:
@@ -268,11 +269,8 @@ class Dispatcher(object):
         """
         self.reset()
         self.parse_args()
-        logger.debug("Dispatching to route: '%s'", self.selector)
-        logger.debug("Callback parameters: '%s'", self.callback_params)
-
-        bridge.TRIGGER_ERROR_ROUTE = self.selector
-        bridge.TRIGGER_ERROR_PARAMS = str(self.callback_params)
+        logger.info("Dispatching to route: '%s'", self.selector)
+        logger.info("Callback parameters: '%s'", self.callback_params)
 
         try:
             # Fetch the controling class and callback function/method
@@ -287,22 +285,21 @@ class Dispatcher(object):
                 parent_ins._process_results(results)
 
         except Exception as e:
+            try:
+                msg = str(e)
+            except UnicodeEncodeError:
+                # This is python 2 only code
+                # We only use unicode to fetch message when we
+                # know that we are dealing with unicode data
+                msg = unicode_type(e).encode("utf8")
+
             # Log the error in both the gui and the kodi log file
             dialog = xbmcgui.Dialog()
-            dialog.notification(e.__class__.__name__, str(e), addon_data.getAddonInfo("icon"))
-            logger.critical(str(e), exc_info=1)
-
-            print 'TOTO' + str(e) + 'TOTO'
-            if str(e) != 'No items found':
-                # Hack perso
-                bridge.LAST_MENU_TRIGGER_ERROR = True
-
-
+            dialog.notification(e.__class__.__name__, msg, addon_data.getAddonInfo("icon"))
+            logger.critical(msg, exc_info=1)
 
         else:
-            from . import start_time
             logger.debug("Route Execution Time: %ims", (time.time() - execute_time) * 1000)
-            logger.debug("Total Execution Time: %ims", (time.time() - start_time) * 1000)
             self.run_delayed()
 
     def run_delayed(self):

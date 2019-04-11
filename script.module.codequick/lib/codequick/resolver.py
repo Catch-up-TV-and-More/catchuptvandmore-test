@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 # Standard Library Imports
+import warnings
 import logging
 import inspect
 import re
@@ -69,6 +70,7 @@ class Resolver(Script):
         * ``dict``: "Dictionary" consisting of "title" as the key and the URL as the value.
         * ``listItem``: A :class:`codequick.Listitem<codequick.listing.Listitem>` object with required data already set e.g. "label" and "path".
         * ``generator``: A Python "generator" that return's one or more URL's.
+        * ``False``: This will cause the "resolver call" to quit silently, without raising a RuntimeError.
 
     .. note:: If multiple URL's are given, a playlist will be automaticly created.
 
@@ -94,6 +96,7 @@ class Resolver(Script):
     def __init__(self):
         super(Resolver, self).__init__()
         self.playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+        self._extra_commands = {}  # Extra options that are passed to listitem
 
     def create_loopback(self, url, **next_params):  # Undocumented
         """
@@ -185,6 +188,7 @@ class Resolver(Script):
             return True
 
         # Setup YoutubeDL module
+        # noinspection PyUnresolvedReferences
         from YDStreamExtractor import getVideoInfo, setOutputCallback, overrideParam
         setOutputCallback(ytdl_logger)
         stored_errors = []
@@ -198,8 +202,13 @@ class Resolver(Script):
         if video_info:
             if video_info.hasMultipleStreams():
                 # More than one stream found, Ask the user to select a stream
-                return self._source_selection(video_info)
-            else:
+                video_info = self._source_selection(video_info)
+
+            if video_info:
+                # Content Lookup needs to be disabled for dailymotion videos to work
+                if video_info.sourceName == "dailymotion":
+                    self._extra_commands["setContentLookup"] = False
+
                 return video_info.streamURL()
 
         # Raise any stored errors
@@ -208,7 +217,9 @@ class Resolver(Script):
 
     @staticmethod
     def extract_youtube(source):  # pragma: no cover
-        # TODO: Remove this method as soon as I found out for sure that youtube.dl works on kodi for Xbox
+        warnings.warn("This method was only temporary and will be removed in future release.", DeprecationWarning)
+        # TODO: Remove this method now that youtube.dl works on kodi for Xbox
+        # noinspection PyPackageRequirements
         import htmlement
         import urlquick
 
@@ -241,8 +252,7 @@ class Resolver(Script):
         Ask user with video stream to play.
 
         :param video_info: YDStreamExtractor video_info object.
-        :returns: Stream url of video
-        :rtype: str
+        :returns: video_info object with the video pre selection.
         """
         display_list = []
         # Populate list with name of extractor ('YouTube') and video title.
@@ -254,7 +264,7 @@ class Resolver(Script):
         ret = dialog.select(self.localize(SELECT_PLAYBACK_ITEM), display_list)
         if ret >= 0:
             video_info.selectStream(ret)
-            return video_info.streamURL()
+            return video_info
 
     def _create_playlist(self, urls):
         """
@@ -267,13 +277,16 @@ class Resolver(Script):
         :rtype: xbmcgui.ListItem
         """
         # Loop each item to create playlist
-        for item in enumerate(filter(None, urls), 1):
-            self._playlist_item(*item)
+        listitems = [self._process_item(*item) for item in enumerate(urls, 1)]
+
+        # Populate Playlis
+        for item in listitems[1:]:
+            self.playlist.add(item.getPath(), item)
 
         # Return the first playlist item
-        return self.playlist[0]
+        return listitems[0]
 
-    def _playlist_item(self, count, url):
+    def _process_item(self, count, url):
         """
         Process the playlist item and add to kodi playlist.
 
@@ -282,11 +295,11 @@ class Resolver(Script):
         """
         # Kodi original listitem object
         if isinstance(url, xbmcgui.ListItem):
-            listitem = url
+            return url
         # Custom listitem object
         elif isinstance(url, Listitem):
             # noinspection PyProtectedMember
-            listitem = url._close()[1]
+            return url._close()[1]
         else:
             # Not already a listitem object
             listitem = xbmcgui.ListItem()
@@ -297,11 +310,10 @@ class Resolver(Script):
                 title = self._title
 
             # Create listitem with new title
-            listitem.setLabel(u"%s Part %i" % (title, count))
+            listitem.setLabel(u"%s Part %i" % (title, count) if count > 1 else title)
+            listitem.setInfo("video", {"title": title})
             listitem.setPath(url)
-
-        # Populate Playlis
-        self.playlist.add(listitem.getPath(), listitem)
+            return listitem
 
     def _process_generator(self, resolved):
         """
@@ -310,7 +322,8 @@ class Resolver(Script):
         :param resolved: The resolved generator to fetch the rest of the videos from
         """
         for item in enumerate(filter(None, resolved), 2):
-            self._playlist_item(*item)
+            listitem = self._process_item(*item)
+            self.playlist.add(listitem.getPath(), listitem)
 
     def _process_results(self, resolved):
         """
@@ -339,22 +352,35 @@ class Resolver(Script):
 
             # Fetch the first element of the generator and process the rest in the background
             elif inspect.isgenerator(resolved):
-                listitem = self._create_playlist([next(resolved)])
+                listitem = self._process_item(1, next(resolved))
                 self.register_delayed(self._process_generator, resolved)
 
             # Create playlist if resolved is a dict of {title: url}
             elif hasattr(resolved, "items"):
-                listitem = self._create_playlist(resolved.items())
+                items = resolved.items()
+                listitem = self._create_playlist(items)
 
             else:
                 # Resolved url must be invalid
                 raise ValueError("resolver returned invalid url of type: '%s'" % type(resolved))
+
+            logger.debug("Resolved Url: %s", listitem.getPath())
+
+        elif resolved is False:
+            # A empty listitem is still required even if 'resolved' is False
+            # From time to time Kodi will report that 'Playback failed'
+            # there is nothing that can be done about that.
+            listitem = xbmcgui.ListItem()
         else:
             raise RuntimeError(self.localize(NO_VIDEO))
 
+        # Add extra parameters to listitem
+        if "setContentLookup" in self._extra_commands:
+            value = self._extra_commands["setContentLookup"]
+            listitem.setContentLookup(value)
+
         # Send playable listitem to kodi
-        logger.debug("Resolved Url: %s", listitem.getPath())
-        xbmcplugin.setResolvedUrl(self.handle, True, listitem)
+        xbmcplugin.setResolvedUrl(self.handle, bool(resolved), listitem)
 
 
 # Now we can import the listing module

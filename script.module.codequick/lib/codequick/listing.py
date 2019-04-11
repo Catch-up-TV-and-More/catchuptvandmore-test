@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 
 # Standard Library Imports
-from collections import MutableMapping
 from time import strptime, strftime
 import logging
 import os
@@ -16,6 +15,13 @@ import xbmcgui
 from codequick.script import Script
 from codequick.support import auto_sort, build_path, logger_id, dispatcher
 from codequick.utils import ensure_unicode, ensure_native_str, unicode_type, PY3, bold
+
+if PY3:
+    # noinspection PyUnresolvedReferences, PyCompatibility
+    from collections.abc import MutableMapping, MutableSequence
+else:
+    # noinspection PyUnresolvedReferences, PyCompatibility
+    from collections import MutableMapping, MutableSequence
 
 __all__ = ["Listitem"]
 
@@ -75,13 +81,16 @@ auto_sort_add = auto_sort.add
 quality_map = ((768, 576), (1280, 720), (1920, 1080), (3840, 2160))  # SD, 720p, 1080p, 4K
 
 # Re.sub to remove formatting from label strings
-strip_formatting = re.compile("\[[^\]]+?\]").sub
+strip_formatting = re.compile(r"\[[^\]]+?\]").sub
 
 # Localized string Constants
 RELATED_VIDEOS = 32201
 RECENT_VIDEOS = 32002
+RECENT_VIDEOS_PLOT = 32004
 ALLVIDEOS = 32003
 NEXT_PAGE = 33078
+NEXT_PAGE_PLOT = 32005
+SEARCH_PLOT = 32006
 SEARCH = 137
 
 
@@ -117,12 +126,26 @@ class Params(MutableMapping):
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.raw_dict)
 
+    def clean(self):
+        """Remove any and all None values from the dictionary."""
+        for key in [key for key, val in self.raw_dict.items() if not val]:
+            del self.raw_dict[key]
+
 
 class Art(Params):
     """
     Dictionary like object, that allows you to add various images. e.g. "thumb", "fanart".
 
-    This class inherits all methods and attributes from :class:`collections.MutableMapping`.
+    if "thumb", "fanart" or "icon"  is not set, then they will be set automaticly based on the add-on's
+    fanart and icon images.
+
+    .. note::
+
+        The automatic image values can be disabled by setting an empty string. e.g. item.art["thumb"] = "".
+
+    .. note::
+
+        This class inherits all methods and attributes from :class:`collections.MutableMapping`.
 
     Expected art values are.
         * thumb
@@ -146,15 +169,12 @@ class Art(Params):
         self._listitem = listitem
 
     def __setitem__(self, key, value):  # type: (str, str) -> None
-        if value:
-            self.raw_dict[key] = ensure_native_str(value)
-        else:
-            logger.debug("Ignoring empty art value: '%s'", key)
+        self.raw_dict[key] = ensure_native_str(value)
 
     def local_thumb(self, image):
         """
         Set the "thumbnail" image to a image file, located in the add-on "resources/media" directory.
-        
+
         :param str image: Filename of the image.
         """
         # Here we can't be sure if 'image' only contains ascii characters, so ensure_native_str is needed
@@ -163,7 +183,7 @@ class Art(Params):
     def global_thumb(self, image):
         """
         Set the "thumbnail" image to a image file, located in the codequick "resources/media" directory.
-        
+
         The available global thumbnail images are.
             * next.png        - Arrow pointing to the right.
             * videos.png      - Circle with a play button in the middle.
@@ -186,6 +206,7 @@ class Art(Params):
         if "icon" not in self.raw_dict:  # pragma: no branch
             self.raw_dict["icon"] = "DefaultFolder.png" if isfolder else "DefaultVideo.png"
 
+        self.clean()  # Remove all None values
         self._listitem.setArt(self.raw_dict)
 
 
@@ -264,10 +285,10 @@ class Info(Params):
     def date(self, date, date_format):
         """
         Set the date infolabel.
-        
+
         :param str date: The date for the listitem.
         :param str date_format: The format of the date as a strftime directive e.g. "june 27, 2017" => "%B %d, %Y"
-        
+
         .. seealso:: The full list of directives can be found at:
 
                     https://docs.python.org/3.6/library/time.html#time.strftime
@@ -429,8 +450,7 @@ class Stream(Params):
                 raise KeyError("unknown stream detail key: '{}'".format(key))
 
         # Now we are ready to send the stream info to kodi
-        if audio:  # pragma: no branch
-            self._listitem.addStreamInfo("audio", audio)
+        self._listitem.addStreamInfo("audio", audio)
         if video:
             self._listitem.addStreamInfo("video", video)
         if subtitle:
@@ -459,12 +479,18 @@ class Context(list):
         Convenient method to add a "Related Videos" context menu item.
 
         All this really does is to call "context.container" and sets "label" for you.
-        
+
         :param callback: The function that will be called when menu item is activated.
         :param args: [opt] "Positional" arguments that will be passed to the callback.
         :param kwargs: [opt] "Keyword" arguments that will be passed to the callback.
         """
-        self.container(callback, Script.localize(RELATED_VIDEOS), *args, **kwargs)
+        # Add '_updatelisting_ = True' to callback params if called from the same callback as is given here
+        if callback.route == dispatcher.get_route():
+            kwargs["_updatelisting_"] = True
+
+        related_videos_text = Script.localize(RELATED_VIDEOS)
+        kwargs["_title_"] = related_videos_text
+        self.container(callback, related_videos_text, *args, **kwargs)
 
     def container(self, callback, label, *args, **kwargs):
         """
@@ -506,11 +532,16 @@ class Listitem(object):
 
     def __init__(self, content_type="video"):
         self._content_type = content_type
+        self.is_playable = True
+        self.is_folder = False
         self._args = None
         self.path = ""
 
         #: The underlining kodi listitem object, for advanced use.
         self.listitem = listitem = xbmcgui.ListItem()
+
+        #: List of paths to subtitle files.
+        self.subtitles = []
 
         self.info = Info(listitem)
         """
@@ -548,9 +579,9 @@ class Listitem(object):
         self.property = Property(listitem)
         """
         Dictionary like object that allows you to add "listitem properties". e.g. "StartOffset".
-        
-        Some of these are processed internally by Kodi, such as the "StartOffset" property, 
-        which is the offset in seconds at which to start playback of an item. Others may be used 
+
+        Some of these are processed internally by Kodi, such as the "StartOffset" property,
+        which is the offset in seconds at which to start playback of an item. Others may be used
         in the skin to add extra information, such as "WatchedCount" for tvshow items.
 
         :examples:
@@ -581,14 +612,29 @@ class Listitem(object):
         """
         Set the "callback" object.
 
-        The "callback" object can be any registered :class:`codequick.Script<codequick.script.Script>`,
-        :class:`codequick.Route<codequick.route.Route>` or :class:`codequick.Resolver<codequick.resolver.Resolver>`
-        callback, or playable URL.
+        The "callback" parameter can be any of the following:
+            * :class:`codequick.Script<codequick.script.Script>` callback.
+            * :class:`codequick.Route<codequick.route.Route>` callback.
+            * :class:`codequick.Resolver<codequick.resolver.Resolver>` callback.
+            * The path to a callback function. i.e. "/main/menu/"
+            * Any kodi path, e.g. "plugin://" or "script://"
+            * Directly playable URL.
+
+        .. note::
+
+            By default kodi plugin / script paths are treated as playable items.
+            To override this behavior, you can pass in the ``is_playable`` and ``is_folder`` parameters.
+            If only ``is_folder`` is given, then ``is_playable`` will default to ``not is_folder``.
 
         :param callback: The "callback" or playable URL.
         :param args: "Positional" arguments that will be passed to the callback.
         :param kwargs: "Keyword" arguments that will be passed to the callback.
         """
+        self.is_folder = is_folder = kwargs.pop("is_folder", self.is_folder)
+        self.is_playable = kwargs.pop("is_playable", not is_folder)
+        if callback in dispatcher.registered_routes:
+            callback = dispatcher.registered_routes[callback].callback
+
         self.path = callback
         self._args = args
         if kwargs:
@@ -596,22 +642,30 @@ class Listitem(object):
 
     # noinspection PyProtectedMember
     def _close(self):
-        callback = self.path
-        if hasattr(callback, "route"):
-            self.listitem.setProperty("isplayable", str(callback.route.is_playable).lower())
-            self.listitem.setProperty("folder", str(callback.route.is_folder).lower())
-            path = build_path(callback, self._args, self.params.raw_dict)
-            isfolder = callback.route.is_folder
-        else:
-            self.listitem.setProperty("isplayable", "true" if callback else "false")
-            self.listitem.setProperty("folder", "false")
-            path = callback
+        path = self.path
+        listitem = self.listitem
+        if hasattr(path, "route"):
+            isfolder = path.route.is_folder
+            listitem.setProperty("isplayable", str(path.route.is_playable).lower())
+            listitem.setProperty("folder", str(path.route.is_folder).lower())
+            path = build_path(path, self._args, self.params.raw_dict)
+        elif not path:
+            listitem.setProperty("isplayable", "false")
+            listitem.setProperty("folder", "false")
             isfolder = False
+        else:
+            listitem.setProperty("isplayable", str(self.is_playable).lower())
+            listitem.setProperty("folder", str(self.is_folder).lower())
+            isfolder = self.is_folder
 
         if not isfolder:
             # Add mediatype if not already set
             if "mediatype" not in self.info.raw_dict and self._content_type in ("video", "music"):  # pragma: no branch
                 self.info.raw_dict["mediatype"] = self._content_type
+
+            # Set the listitem subtitles
+            if self.subtitles:
+                self.listitem.setSubtitles(self.subtitles)
 
             # Add Video Specific Context menu items
             self.context.append(("$LOCALIZE[13347]", "XBMC.Action(Queue)"))
@@ -625,14 +679,14 @@ class Listitem(object):
             self.label = u"UNKNOWN"
 
         # Close common datasets
-        self.listitem.setPath(path)
+        listitem.setPath(path)
         self.property._close()
         self.context._close()
         self.info._close(self._content_type)
         self.art._close(isfolder)
 
         # Return a tuple compatible with 'xbmcplugin.addDirectoryItems'
-        return path, self.listitem, isfolder
+        return path, listitem, isfolder
 
     @classmethod
     def from_dict(cls, callback, label, art=None, info=None, stream=None, context=None, properties=None, params=None):
@@ -684,6 +738,7 @@ class Listitem(object):
         Constructor for adding link to "Next Page" of content.
 
         The current running "callback" will be called with all of the parameters that are given here.
+        You can also specify which "callback" will be called by setting a keywork only argument called 'callback'.
 
         :param args: "Positional" arguments that will be passed to the callback.
         :param kwargs: "Keyword" arguments that will be passed to the callback.
@@ -693,7 +748,8 @@ class Listitem(object):
             >>> item.next_page(url="http://example.com/videos?page2")
         """
         # Current running callback
-        route = dispatcher.get_route()
+        callback = dispatcher.get_route().callback
+        callback = kwargs.pop("callback", callback)
 
         # Add support params to callback params
         kwargs["_updatelisting_"] = True if u"_nextpagecount_" in dispatcher.params else False
@@ -703,10 +759,10 @@ class Listitem(object):
         # Create listitem instance
         item = cls()
         label = u"%s %i" % (Script.localize(NEXT_PAGE), kwargs["_nextpagecount_"])
-        item.info["plot"] = "Show the next page of content."
+        item.info["plot"] = Script.localize(NEXT_PAGE_PLOT)
         item.label = bold(label)
         item.art.global_thumb("next.png")
-        item.set_callback(route.callback, *args, **kwargs)
+        item.set_callback(callback, *args, **kwargs)
         return item
 
     @classmethod
@@ -723,9 +779,9 @@ class Listitem(object):
         # Create listitem instance
         item = cls()
         item.label = bold(Script.localize(RECENT_VIDEOS))
-        item.info["plot"] = "Show the most recent videos."
+        item.info["plot"] = Script.localize(RECENT_VIDEOS_PLOT)
         item.art.global_thumb("recent.png")
-        item.set_callback(callback, args, **kwargs)
+        item.set_callback(callback, *args, **kwargs)
         return item
 
     @classmethod
@@ -754,8 +810,8 @@ class Listitem(object):
         item = cls()
         item.label = bold(Script.localize(SEARCH))
         item.art.global_thumb("search.png")
-        item.info["plot"] = "Search for video content."
-        item.set_callback(SavedSearches, route=callback.route.path, first_load=True, **kwargs)
+        item.info["plot"] = Script.localize(SEARCH_PLOT)
+        item.set_callback(SavedSearches, _route=callback.route.path, first_load=True, **kwargs)
         return item
 
     @classmethod

@@ -1,0 +1,18 @@
+{
+
+    "_comment": "Config file to detect navigation errors on Replay FR menu",
+
+
+    "disable_video_player": true,
+    "print_all_explored_items": true,
+    "disable_image_check": true,
+
+    "auto_exploration": true,
+    "entry_points": "1-2-1",
+    "wait_time": 0,
+    "max_items_to_explore": 50,
+    "exploration_strategy": "RANDOM",
+    "max_depth": 15,
+    "max_items_per_menu" : 5,
+    "exit_on_error": true
+}
