@@ -3,18 +3,18 @@ from __future__ import unicode_literals
 import sys
 import mock
 import common
-from config import *
+import config
 
 ADDONS_SETTINGS = {
-    'plugin.video.catchuptvandmore': ADDON_FAKE_SETTINGS,
-    'script.module.codequick': CODEQUICK_FAKE_SETTINGS,
-    'script.module.inputstreamhelper': INPUTSTREAMHELPER_FAKE_SETTINGS
+    'plugin.video.catchuptvandmore': common.ADDON_SETTINGS,
+    'script.module.codequick': config.CODEQUICK_FAKE_SETTINGS,
+    'script.module.inputstreamhelper': config.INPUTSTREAMHELPER_FAKE_SETTINGS
 }
 
 ADDONS_LABELS = {
-    'plugin.video.catchuptvandmore': ADDON_FAKE_LABELS,
-    'script.module.codequick': CODEQUICK_FAKE_LABELS,
-    'script.module.inputstreamhelper': INPUTSTREAMHELPER_FAKE_LABELS
+    'plugin.video.catchuptvandmore': common.ADDON_LABELS,
+    'script.module.codequick': config.CODEQUICK_FAKE_LABELS,
+    'script.module.inputstreamhelper': config.INPUTSTREAMHELPER_FAKE_LABELS
 }
 
 ADDONS_NAME = {
@@ -24,7 +24,7 @@ ADDONS_NAME = {
 }
 
 ADDONS_PATHS = {
-    'plugin.video.catchuptvandmore': CONFIG['addon_path'],
+    'plugin.video.catchuptvandmore': config.CONFIG['addon_path'],
     'script.module.codequick': common.CODEQUICK_ADDON_PATH,
     'script.module.inputstreamhelper': common.INPUTSTREAMHELPER_ADDON_PATH
 }
@@ -65,28 +65,31 @@ class FakeAddon(object):
         elif info_id == 'icon':
             result = self._icon
         elif info_id == 'profile':
-            result = common.CONFIG_PATH
+            result = common.USERDATA_PATH
         else:
             raise Exception(
                 'Need to complete getAddonInfo mock for info_id: ' + info_id)
 
-        if not CONFIG['disable_xbmcaddon_mock_log']:
+        if not config.CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] getAddonInfo of "' + common.to_unicode(info_id) + '" --> "' + common.to_unicode(result) + '"')
         return result
 
     def getSetting(self, setting_id):
-        if not CONFIG['disable_xbmcaddon_mock_log']:
+        if setting_id not in self._settings:
+            print('[FakeAddon] Missing setting_id "' + str(setting_id) + '" in ADDON_FAKE_SETTINGS (config.py)')
+            exit(-1)
+        if not config.CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] getSetting of "' + common.to_unicode(setting_id) + '" --> "' + common.to_unicode(self._settings.get(setting_id, '')) + '"')
         return self._settings.get(setting_id, '')
 
     def setSetting(self, _id, value):
-        if not CONFIG['disable_xbmcaddon_mock_log']:
+        if not config.CONFIG['disable_xbmcaddon_mock_log']:
             print('[FakeAddon] setSetting of "' + common.to_unicode(_id) + '" --> "' + common.to_unicode(value) + '"')
         self._settings[_id] = value
 
     def getLocalizedString(self, id_):
-        if not CONFIG['disable_xbmcaddon_mock_log']:
-            print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_, str(id_)) + '"')
+        if not config.CONFIG['disable_xbmcaddon_mock_log']:
+            print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + self._labels.get(id_) + '"')
         return self._labels.get(id_, str(id_))
 
 
