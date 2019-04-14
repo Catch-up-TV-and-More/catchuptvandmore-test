@@ -2,7 +2,6 @@
 
 import sys
 import mock
-from config import *
 
 mock_xbmcvfs = mock.MagicMock()
 

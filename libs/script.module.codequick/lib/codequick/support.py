@@ -18,6 +18,9 @@ import xbmc
 # Package imports
 from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3, unicode_type
 
+# HACK simulator
+from runtime_error import RuntimeErrorCQ
+
 script_data = xbmcaddon.Addon("script.module.codequick")
 addon_data = xbmcaddon.Addon()
 
@@ -272,6 +275,9 @@ class Dispatcher(object):
         logger.info("Dispatching to route: '%s'", self.selector)
         logger.info("Callback parameters: '%s'", self.callback_params)
 
+        RuntimeErrorCQ.last_codequick_route = self.selector
+        RuntimeErrorCQ.last_codequick_callback_params = self.callback_params
+
         try:
             # Fetch the controling class and callback function/method
             route = self.get_route()
@@ -297,6 +303,9 @@ class Dispatcher(object):
             dialog = xbmcgui.Dialog()
             dialog.notification(e.__class__.__name__, msg, addon_data.getAddonInfo("icon"))
             logger.critical(msg, exc_info=1)
+
+            RuntimeErrorCQ.last_error_message = msg
+            RuntimeErrorCQ.last_menu_triggered_error = True
 
         else:
             logger.debug("Route Execution Time: %ims", (time.time() - execute_time) * 1000)

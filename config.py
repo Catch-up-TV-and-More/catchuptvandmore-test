@@ -41,7 +41,7 @@ class Config(metaclass=ConfigMC):
         parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
         parser.add_argument('--entry-point', default='1', help='Entry point of the simulation (separate items with dashes (e.g. \'1-2-1-13\')) [1]')
         parser.add_argument('--exit-on-error', action='store_true', help='Quit simulator at the first error encountered')
-        parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video slection')
+        parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video selection')
         parser.add_argument('--kodi-version', default='LEIA', choices=['LEIA', 'KRYPTON', 'JARVIS'], help='Kodi version to simulate [LEIA]')
         parser.add_argument('--print-all-explored-menus', action='store_true', help='Print all explored menus when exit the simulator')
         parser.add_argument('--disable-image-check', action='store_true', help='Do not check image URL')

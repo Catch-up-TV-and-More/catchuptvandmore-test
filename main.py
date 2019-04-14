@@ -11,6 +11,9 @@ from importlib import reload
 from config import Config
 from route import Route
 from directory import Directory
+from runtime_error import RuntimeErrorCQ
+
+WARNING = u'\U000026A0'
 
 
 def main():
@@ -41,12 +44,10 @@ def main():
     import mocks.mock_xbmc
     import mocks.mock_xbmcplugin
     import mocks.mock_xbmcgui
-    # import mocks.mock_xbmcvfs
+    import mocks.mock_xbmcvfs
     # import mocks.mock_youtube_dl
 
     import addon
-
-    print('Entry point: ' + str(Config.get('entry_point')))
 
     entry_point_reached = False
 
@@ -72,24 +73,44 @@ def main():
             # If next_item = -2 we just reload the addon we the same route
             next_item = -2
 
-            # Print the current directory
-            print(Directory.current_directory)
-            print(Route.print_exploring_routes())
+            # If an error was trigger
+            if RuntimeErrorCQ.last_menu_triggered_error:
+                print('\n' + WARNING + ' The last selection triggered an error (see log above) ' + WARNING + '\n')
+                error = RuntimeErrorCQ(path=Route.pretty_exploring_routes())
+                print(error)
+                RuntimeErrorCQ.reset_error_trigger()
+
+                if Config.get('exit_on_error'):
+                    next_item = -1
+                else:
+                    next_item = 0
 
 
-            # If the entry_point was not reached we follow the entry point path
-            if not entry_point_reached:
-                next_item = Config.get('entry_point')[len(current_route.path)]
+            # Else if the current directory is a playable item
+            elif Directory.is_current_directory_playable():
+                item = Directory.current_directory.items[0]
+                print('PLAYABLE URL: {}'.format(item.url))
+                next_item = 0
 
-            # Else we ask the user to choose the next item number
+            # Else print the current directory
             else:
-                # We wait the user input
-                try:
-                    sys.stdout.flush()
-                    next_item = int(input('Next item to select? (-1 to exit, <enter> to reload same directory)\n'))
-                except Exception:
-                    pass
-                print('')
+                print(Directory.current_directory)
+                print(Route.pretty_exploring_routes() + '\n')
+
+
+                # If the entry_point was not reached we follow the entry point path
+                if not entry_point_reached:
+                    next_item = Config.get('entry_point')[len(current_route.path)]
+
+                # Else we ask the user to choose the next item number
+                else:
+                    # We wait the user input
+                    try:
+                        sys.stdout.flush()
+                        next_item = int(input('Next item to select? (-1 to exit, <enter> to reload same directory)\n'))
+                    except Exception:
+                        pass
+                    print('')
 
 
             # If there is no item for this value, reload the same menu to prevent error
@@ -119,12 +140,12 @@ def main():
 
 
 
-
-
-
+    ret_val = RuntimeErrorCQ.print_encountered_errors()
+    return ret_val
 
 
 
 
 if __name__ == '__main__':
-    main()
+    ret_val = main()
+    sys.exit(ret_val)

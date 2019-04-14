@@ -15,7 +15,6 @@ from route import Route
 
 
 def fake_add_directory_items(handle, items_qd, totalItems=0):
-    # runtime.CURRENT_PATH[-1]['menu'] = {'items': []}
     directory = Directory()
     directory.path = Route.current_explored_route.path
 
@@ -40,9 +39,14 @@ def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDi
 
 
 def fake_set_resolve_url(handle, succeeded, listitem):
-    if listitem._path:
-        print('[path] = ' + listitem._path)
-        # runtime.CURRENT_PATH[-1]['video'] = {'url': listitem._path}
+    directory = Directory()
+    directory.path = Route.current_explored_route.path
+    item = Item()
+    item.url = listitem._path
+    item.listitem = listitem
+    item.is_folder = False
+    directory.items[0] = item
+    Directory.current_directory = directory
 
 
 def fake_add_sort_method(handle, sortMethod, label2Mask=""):

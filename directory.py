@@ -20,57 +20,42 @@ TV = u'\U0001F4FA'
 WARNING = u'\U000026A0'
 BACK_ARROW = u'\U0001F519'
 LEFT_ARROW_CURVING_RIGHT = u'\U000021AA'
+QUESTION_MARK = u'\U00002754'
 
 
 
 def check_image(path):
     # First we need to check if image is local or from internet
-    from_internet = False
-    valid_image = True
-    is_addon_icon = False
-    is_addon_fanart = False
+    image_pp = ''
 
     if 'http' in path:
-        from_internet = True
+        image_pp += WEB + ' '
 
         if not Config.get('disable_image_check'):
             # We need to check the status code without download the image
             r = urlquick.head(path)
-            if r.headers['content-type'] != 'image/jpeg':
-                valid_image = False
+            if 'image' in r.headers['content-type']:
+                image_pp += CHECK
+            else:
+                image_pp += NO_CHECK
         else:
-            valid_image = False
+            image_pp += QUESTION_MARK
 
     else:
+        image_pp += COMPUTER + ' '
         try:
             result = imghdr.what(path)
             if result is None:
-                valid_image = False
+                image_pp += NO_CHECK
             else:
                 if path == Config.get('addon_icon_filepath'):
-                    is_addon_icon = True
+                    image_pp += TV
                 elif path == Config.get('addon_fanart_filepath'):
-                    is_addon_fanart = True
+                    image_pp += TV
                 else:
-                    pass
+                    image_pp += CHECK
         except Exception:
-            valid_image = False
-
-    image_pp = ''
-
-    if from_internet:
-        image_pp += WEB
-    else:
-        image_pp += COMPUTER
-
-    image_pp += ' '
-
-    if is_addon_icon or is_addon_fanart:
-        image_pp += TV
-    elif valid_image:
-        image_pp += CHECK
-    else:
-        image_pp += NO_CHECK
+            image_pp += NO_CHECK
 
     return image_pp
 
@@ -219,6 +204,13 @@ class Item():
 class Directory():
 
     current_directory = None
+
+    @classmethod
+    def is_current_directory_playable(cls):
+        if len(cls.current_directory.items) == 1 and \
+                cls.current_directory.items[0].is_folder is False:
+            return True
+        return False
 
     def __init__(self, succeeded=False, update_listing=False, path=[]):
         self.items = {}

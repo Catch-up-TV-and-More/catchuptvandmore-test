@@ -66,7 +66,7 @@ class Route:
         return route
 
     @classmethod
-    def print_exploring_routes(cls):
+    def pretty_exploring_routes(cls):
         path_pp = LEFT_ARROW_CURVING_RIGHT + ' '
         cnt = 0
         for route in Route._exploring_routes:
@@ -74,8 +74,7 @@ class Route:
                 path_pp += ' ' + RIGHT_ARROW + ' '
             path_pp += route.label + ' (' + str(route.path[-1]) + ')'
             cnt += 1
-        path_pp += '\n'
-        print(path_pp)
+        return path_pp
 
     def __init__(self, label='', base_url='plugin://plugin.video.catchuptvandmore/', query_string='', path=[]):
         self.path = path
