@@ -10,37 +10,39 @@ import sys
 import mock
 import runtime
 
+from directory import Directory, Item
+from route import Route
 
-def fake_add_directory_items(handle, items, totalItems=0):
-    runtime.CURRENT_PATH[-1]['menu'] = {'items': []}
-    for item in items:
-        current_item = {}
-        current_item['url'] = item[0]
-        current_item['listitem'] = item[1]
-        current_item['is_folder'] = item[2]
 
-        runtime.CURRENT_PATH[-1]['menu']['items'].append(current_item)
+def fake_add_directory_items(handle, items_qd, totalItems=0):
+    # runtime.CURRENT_PATH[-1]['menu'] = {'items': []}
+    directory = Directory()
+    directory.path = Route.current_explored_route.path
+
+    cnt = 0
+    for item_cq in items_qd:
+        item = Item()
+        cnt += 1
+        item.url = item_cq[0]
+        item.listitem = item_cq[1]
+        item.is_folder = item_cq[2]
+        item.key = cnt
+
+        directory.items[cnt] = item
+
+    Directory.current_directory = directory
     return True
 
 
 def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDisc=True):
-    if 'menu' not in runtime.CURRENT_PATH[-1]:
-        runtime.CURRENT_PATH[-1]['menu'] = {}
-    if succeeded:
-        runtime.CURRENT_PATH[-1]['menu']['succeeded'] = True
-    else:
-        runtime.CURRENT_PATH[-1]['menu']['succeeded'] = False
-    if updateListing:
-        runtime.CURRENT_PATH[-1]['menu']['update_listing'] = True
-    else:
-        runtime.CURRENT_PATH[-1]['menu']['update_listing'] = False
-
+    Directory.current_directory.succeeded = succeeded
+    Directory.current_directory.update_listing = updateListing
 
 
 def fake_set_resolve_url(handle, succeeded, listitem):
     if listitem._path:
         print('[path] = ' + listitem._path)
-        runtime.CURRENT_PATH[-1]['video'] = {'url': listitem._path}
+        # runtime.CURRENT_PATH[-1]['video'] = {'url': listitem._path}
 
 
 def fake_add_sort_method(handle, sortMethod, label2Mask=""):

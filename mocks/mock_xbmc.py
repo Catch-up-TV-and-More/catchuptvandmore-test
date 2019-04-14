@@ -2,7 +2,8 @@
 
 import sys
 import mock
-from config import *
+
+from config import Config
 
 LOGDEBUG = 0
 LOGERROR = 4
@@ -15,8 +16,9 @@ LOGWARNING = 3
 
 
 def fake_log(msg, level=LOGDEBUG):
-    if not CONFIG['disable_kodi_log'] and level >= CONFIG['kodi_log_level']:
-        print('[FakeKodiLog level ' + str(level) + '] ' + msg)
+    if not Config.get('disable_kodi_log') and level >= Config.get('kodi_log_level'):
+        print('[FakeKodiLog level {}] {}'.format(level, msg))
+    pass
 
 
 def fake_translate_path(path):
@@ -25,23 +27,23 @@ def fake_translate_path(path):
 
 def fake_get_info_label(id_):
     if id_ == 'System.BuildVersion':
-        if CONFIG['kodi_version'] == 'JARVIS':
+        if Config.get('kodi_version') == 'JARVIS':
             return '16.3 fakefakefakefakefake'
-        if CONFIG['kodi_version'] == 'KRYPTON':
+        if Config.get('kodi_version') == 'KRYPTON':
             return '17.5 fakefakefakefakefake'
-        if CONFIG['kodi_version'] == 'LEIA':
+        if Config.get('kodi_version') == 'LEIA':
             return '18.0 fakefakefakefakefake'
     return ''
 
 
 def get_localized_string(id_):
     result = str(id_)
-    if id_ in ADDON_FAKE_LABELS:
-        result = ADDON_FAKE_LABELS[id_]
-    elif id_ in CODEQUICK_FAKE_LABELS:
-        result = CODEQUICK_FAKE_LABELS[id_]
-    if not CONFIG['disable_xbmc_mock_log']:
-        print('[FakeAddon] getLocalizedString of ' + str(id_) + ' --> "' + result + '"')
+    if id_ in Config.get('addon_labels'):
+        result = Config.get('addon_labels')[id_]
+    elif id_ in Config.get('codequick_labels'):
+        result = Config.get('codequick_labels')[id_]
+    if not Config.get('disable_xbmc_mock_log'):
+        print('[FakeAddon] getLocalizedString of {} --> "{}"'.format(id_, result))
     return result
 
 
@@ -53,14 +55,15 @@ class FakeKeyboard(object):
         pass
 
     def getText(self):
-        if CONFIG['auto_exploration']:
-            return "Chien"
-        else:
-            try:
-                entry = raw_input("Kodi keyboard entry: ")
-                return entry
-            except Exception:
-                return ""
+        # if CONFIG['auto_exploration']:
+        #     return "Chien"
+        # else:
+        #     try:
+        #         entry = raw_input("Kodi keyboard entry: ")
+        #         return entry
+        #     except Exception:
+        #         return ""
+        return
 
     def isConfirmed(self):
         return True
