@@ -62,7 +62,7 @@ def main():
 
         # Check if the entry point was reached
         if current_route.path == Config.get('entry_point'):
-            print('[DEBUG] Entry point reached')
+            print('[DEBUG] Entry point reached: ' + str(Config.get('entry_point')))
             entry_point_reached = True
 
         # Hock sys.argv

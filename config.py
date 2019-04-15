@@ -37,7 +37,7 @@ class Config(metaclass=ConfigMC):
         parser = argparse.ArgumentParser(description='Catch-up TV & More simulator')
 
         parser.add_argument('-a', '--addon-path', default='', help='Path of plugin.video.catchuptvandmore')
-        parser.add_argument('-c', '--config-file', default='', help='Optional JSON config file (CLI args take precedence over the config file)')
+        parser.add_argument('-c', '--config-file', default='', help='Optional JSON config file (if given, CLI args are not taken !!)')
         parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
         parser.add_argument('--entry-point', default='1', help='Entry point of the simulation (separate items with dashes (e.g. \'1-2-1-13\')) [1]')
         parser.add_argument('--exit-after-x-errors', type=int, default=-1, help='Exit simulator after N errors encountered [-1]')
@@ -61,7 +61,7 @@ class Config(metaclass=ConfigMC):
         auto_exploration_group.add_argument('--wait-time', type=float, default=1.0, help='Time to wait between each menu during exploration [1sec]')
         auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
         auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
-        auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore')
+        auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore from the entry point')
 
         cls._config = vars(parser.parse_args())
 
@@ -77,66 +77,7 @@ class Config(metaclass=ConfigMC):
                 for k in config_json.keys():
                     if k not in cls._config and k != '_comment':
                         raise Exception('The key "{}" in your json file is invalid'.format(k))
-
-
-
-        # We keep in priority the infos from the CLI
-        if 'addon_path' in config_json and cls._config['addon_path'] == '':
-            cls._config['addon_path'] = config_json['addon_path']
-
-        if 'console_size' in config_json and cls._config['console_size'] == 160:
-            cls._config['console_size'] = config_json['console_size']
-
-        if 'entry_point' in config_json and cls._config['entry_point'] == '':
-            cls._config['entry_point'] = config_json['entry_point']
-
-        if 'exit_after_x_errors' in config_json and cls._config['exit_after_x_errors'] is -1:
-            cls._config['exit_after_x_errors'] = config_json['exit_after_x_errors']
-
-        if 'disable_video_player' in config_json and cls._config['disable_video_player'] is False:
-            cls._config['disable_video_player'] = config_json['disable_video_player']
-
-        if 'kodi_version' in config_json and cls._config['kodi_version'] == 'LEIA':
-            cls._config['kodi_version'] = config_json['kodi_version']
-
-        if 'print_all_explored_items' in config_json and cls._config['print_all_explored_items'] is False:
-            cls._config['print_all_explored_items'] = config_json['print_all_explored_items']
-
-        if 'disable_image_check' in config_json and cls._config['disable_image_check'] is False:
-            cls._config['disable_image_check'] = config_json['disable_image_check']
-
-        if 'autoreload_addon' in config_json and cls._config['autoreload_addon'] is False:
-            cls._config['autoreload_addon'] = config_json['autoreload_addon']
-
-        if 'disable_kodi_log' in config_json and cls._config['disable_kodi_log'] is False:
-            cls._config['disable_kodi_log'] = config_json['disable_kodi_log']
-
-        if 'kodi_log_level' in config_json and cls._config['kodi_log_level'] == 0:
-            cls._config['kodi_log_level'] = config_json['kodi_log_level']
-
-        if 'disable_xbmcaddon_mock_log' in config_json and cls._config['disable_xbmcaddon_mock_log'] is False:
-            cls._config['disable_xbmcaddon_mock_log'] = config_json['disable_xbmcaddon_mock_log']
-
-        if 'disable_xbmc_mock_log' in config_json and cls._config['disable_xbmc_mock_log'] is False:
-            cls._config['disable_xbmc_mock_log'] = config_json['disable_xbmc_mock_log']
-
-        if 'auto_exploration' in config_json and cls._config['auto_exploration'] is False:
-            cls._config['auto_exploration'] = config_json['auto_exploration']
-
-        if 'max_items_per_menu' in config_json and cls._config['max_items_per_menu'] == -1:
-            cls._config['max_items_per_menu'] = config_json['max_items_per_menu']
-
-        if 'wait_time' in config_json and cls._config['wait_time'] == 1:
-            cls._config['wait_time'] = config_json['wait_time']
-
-        if 'max_items_to_explore' in config_json and cls._config['max_items_to_explore'] == -1:
-            cls._config['max_items_to_explore'] = config_json['max_items_to_explore']
-
-        if 'exploration_strategy' in config_json and cls._config['exploration_strategy'] == 'RANDOM':
-            cls._config['exploration_strategy'] = config_json['exploration_strategy']
-
-        if 'max_depth' in config_json and cls._config['max_depth'] == -1:
-            cls._config['max_depth'] = config_json['max_depth']
+                    cls._config[k] = config_json[k]
 
 
         # We get the full path of the addon path
@@ -170,6 +111,10 @@ class Config(metaclass=ConfigMC):
         for item_key in cls._config['entry_point'].split('-'):
             entry_point.append(int(item_key))
         cls._config['entry_point'] = entry_point
+
+        # We move max depth according to the entry point
+        if cls._config['max_depth'] != -1:
+            cls._config['max_depth'] = cls._config['max_depth'] + len(cls._config['entry_point']) -1
 
 
         # Parse settings.xml file
