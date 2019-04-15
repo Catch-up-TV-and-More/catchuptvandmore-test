@@ -1,6 +1,6 @@
 {
 
-    "_comment": "Config file to open addon root menu and exit",
+    "_comment": "Config file to open each replay country menu and exit",
 
     "addon_path": "../plugin.video.catchuptvandmore",
     "entry_point": "1-2",
