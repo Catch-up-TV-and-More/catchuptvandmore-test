@@ -27,6 +27,7 @@ class RuntimeErrorCQ:
         if len(cls.all_errors) == 0:
             print('\n* No error encountered')
             return 0
+
         print('\n* Encountered errors list:\n')
         cnt = 0
         for error in cls.all_errors:

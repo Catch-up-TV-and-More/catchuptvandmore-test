@@ -91,7 +91,7 @@ class AutoExploration:
 
         item_to_explore = cls.items_to_explore[str(current_path)][-1]
         cls.items_to_explore[str(current_path)].pop()
-        # print('[DEBUG next item auto exploration] Menu not all items done --> ' + str(item_to_explore))
+        print('[DEBUG next item auto exploration] Menu not all items done --> ' + str(item_to_explore))
         cls.explored_items_cnt += 1
         return item_to_explore
 
