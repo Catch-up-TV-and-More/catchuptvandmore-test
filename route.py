@@ -24,6 +24,9 @@ class Route:
     # - type: list<str(path)>
     _explored_paths = set()
 
+    _explored_routes_s = set()
+    explored_routes_l = []
+
     # Routes to explore (Route)
     # - type: list<Route>
     _exploring_routes = []
@@ -63,6 +66,13 @@ class Route:
         route = cls._exploring_routes[-1]
         cls.current_explored_route = route
         cls._explored_paths.add(str(route.path))
+
+        if cls.pretty_exploring_routes() not in cls._explored_routes_s:
+            cls._explored_routes_s.add(cls.pretty_exploring_routes())
+            cls.explored_routes_l.append(cls.pretty_exploring_routes())
+
+
+
         return route
 
     @classmethod

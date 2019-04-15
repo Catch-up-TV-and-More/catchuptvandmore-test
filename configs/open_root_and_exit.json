@@ -1,0 +1,17 @@
+{
+
+    "_comment": "Config file to open addon root menu and exit",
+
+    "addon_path": "../plugin.video.catchuptvandmore",
+
+    "print_all_explored_items": true,
+
+    "disable_image_check": true,
+
+    "auto_exploration": true,
+    "entry_point": "1",
+    "max_items_to_explore": -1,
+    "wait_time": 0.0,
+    "exploration_strategy": "RANDOM",
+    "max_depth": 1
+}

@@ -208,7 +208,7 @@ class Directory():
     @classmethod
     def is_current_directory_playable(cls):
         if len(cls.current_directory.items) == 1 and \
-                cls.current_directory.items[0].is_folder is False:
+                cls.current_directory.items[1].is_folder is False:
             return True
         return False
 

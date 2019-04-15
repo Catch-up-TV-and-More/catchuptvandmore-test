@@ -40,11 +40,12 @@ class Config(metaclass=ConfigMC):
         parser.add_argument('-c', '--config-file', default='', help='Optional JSON config file (CLI args take precedence over the config file)')
         parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
         parser.add_argument('--entry-point', default='1', help='Entry point of the simulation (separate items with dashes (e.g. \'1-2-1-13\')) [1]')
-        parser.add_argument('--exit-on-error', action='store_true', help='Quit simulator at the first error encountered')
+        parser.add_argument('--exit-after-x-errors', type=int, default=-1, help='Exit simulator after N errors encountered [-1]')
         parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video selection')
         parser.add_argument('--kodi-version', default='LEIA', choices=['LEIA', 'KRYPTON', 'JARVIS'], help='Kodi version to simulate [LEIA]')
-        parser.add_argument('--print-all-explored-menus', action='store_true', help='Print all explored menus when exit the simulator')
+        parser.add_argument('--print-all-explored-items', action='store_true', help='Print all explored items when exit the simulator')
         parser.add_argument('--disable-image-check', action='store_true', help='Do not check image URL')
+        parser.add_argument('--autoreload-addon', action='store_true', help='Auto reload addon source files (usefull during dev)')
 
 
         log_group = parser.add_argument_group('Logging')
@@ -54,14 +55,13 @@ class Config(metaclass=ConfigMC):
         log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')
 
 
-        # auto_exploration_group = parser.add_argument_group('Auto exploration mode')
-        # auto_exploration_group.add_argument('--auto-exploration', action='store_true', help='Enable auto exploration of addon menus')
-        # auto_exploration_group.add_argument('--entry-points', default='1', help='By default the auto exploration starts from the root menu but you can specify a list of entry points to explore (e.g. \'1, 1-2-1\')')
-        # auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
-        # auto_exploration_group.add_argument('--wait-time', type=float, default=1.0, help='Time to wait between each menu during exploration [1sec]')
-        # auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
-        # auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
-        # auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore')
+        auto_exploration_group = parser.add_argument_group('Auto exploration mode')
+        auto_exploration_group.add_argument('--auto-exploration', action='store_true', help='Enable auto exploration of addon menus')
+        auto_exploration_group.add_argument('--max-items-per-menu', type=int, default=-1, help='Limit the number of items to explore per menu')
+        auto_exploration_group.add_argument('--wait-time', type=float, default=1.0, help='Time to wait between each menu during exploration [1sec]')
+        auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
+        auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
+        auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore')
 
         cls._config = vars(parser.parse_args())
 
@@ -90,8 +90,8 @@ class Config(metaclass=ConfigMC):
         if 'entry_point' in config_json and cls._config['entry_point'] == '':
             cls._config['entry_point'] = config_json['entry_point']
 
-        if 'exit_on_error' in config_json and cls._config['exit_on_error'] is False:
-            cls._config['exit_on_error'] = config_json['exit_on_error']
+        if 'exit_after_x_errors' in config_json and cls._config['exit_after_x_errors'] is -1:
+            cls._config['exit_after_x_errors'] = config_json['exit_after_x_errors']
 
         if 'disable_video_player' in config_json and cls._config['disable_video_player'] is False:
             cls._config['disable_video_player'] = config_json['disable_video_player']
@@ -105,6 +105,9 @@ class Config(metaclass=ConfigMC):
         if 'disable_image_check' in config_json and cls._config['disable_image_check'] is False:
             cls._config['disable_image_check'] = config_json['disable_image_check']
 
+        if 'autoreload_addon' in config_json and cls._config['autoreload_addon'] is False:
+            cls._config['autoreload_addon'] = config_json['autoreload_addon']
+
         if 'disable_kodi_log' in config_json and cls._config['disable_kodi_log'] is False:
             cls._config['disable_kodi_log'] = config_json['disable_kodi_log']
 
@@ -117,26 +120,23 @@ class Config(metaclass=ConfigMC):
         if 'disable_xbmc_mock_log' in config_json and cls._config['disable_xbmc_mock_log'] is False:
             cls._config['disable_xbmc_mock_log'] = config_json['disable_xbmc_mock_log']
 
-        # if 'auto_exploration' in config_json and cls._config['auto_exploration'] is False:
-        #     cls._config['auto_exploration'] = config_json['auto_exploration']
+        if 'auto_exploration' in config_json and cls._config['auto_exploration'] is False:
+            cls._config['auto_exploration'] = config_json['auto_exploration']
 
-        # if 'entry_points' in config_json and cls._config['entry_points'] == '1':
-        #     cls._config['entry_points'] = config_json['entry_points']
+        if 'max_items_per_menu' in config_json and cls._config['max_items_per_menu'] == -1:
+            cls._config['max_items_per_menu'] = config_json['max_items_per_menu']
 
-        # if 'max_items_per_menu' in config_json and cls._config['max_items_per_menu'] == -1:
-        #     cls._config['max_items_per_menu'] = config_json['max_items_per_menu']
+        if 'wait_time' in config_json and cls._config['wait_time'] == 1:
+            cls._config['wait_time'] = config_json['wait_time']
 
-        # if 'wait_time' in config_json and cls._config['wait_time'] == 1:
-        #     cls._config['wait_time'] = config_json['wait_time']
+        if 'max_items_to_explore' in config_json and cls._config['max_items_to_explore'] == -1:
+            cls._config['max_items_to_explore'] = config_json['max_items_to_explore']
 
-        # if 'max_items_to_explore' in config_json and cls._config['max_items_to_explore'] == -1:
-        #     cls._config['max_items_to_explore'] = config_json['max_items_to_explore']
+        if 'exploration_strategy' in config_json and cls._config['exploration_strategy'] == 'RANDOM':
+            cls._config['exploration_strategy'] = config_json['exploration_strategy']
 
-        # if 'exploration_strategy' in config_json and cls._config['exploration_strategy'] == 'RANDOM':
-        #     cls._config['exploration_strategy'] = config_json['exploration_strategy']
-
-        # if 'max_depth' in config_json and cls._config['max_depth'] == -1:
-        #     cls._config['max_depth'] = config_json['max_depth']
+        if 'max_depth' in config_json and cls._config['max_depth'] == -1:
+            cls._config['max_depth'] = config_json['max_depth']
 
 
         # We get the full path of the addon path

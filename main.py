@@ -5,13 +5,14 @@
 import sys
 import mock
 from importlib import reload
-
+import time
 
 # User modules imports
 from config import Config
 from route import Route
 from directory import Directory
 from runtime_error import RuntimeErrorCQ
+from auto_exploration import AutoExploration
 
 WARNING = u'\U000026A0'
 
@@ -61,10 +62,24 @@ def main():
 
         # Check if the entry point was reached
         if current_route.path == Config.get('entry_point'):
+            print('[DEBUG] Entry point reached')
             entry_point_reached = True
 
         # Hock sys.argv
         with mock.patch('sys.argv', current_route.get_fake_sys_argv()):
+
+            if Config.get('autoreload_addon'):
+                # We need to reload the addon module in order to be able
+                # to modify the source code of the addon on the fly without restarting
+                # the simulator
+                # (usefull during dev)
+                for k, v in sys.modules.items():
+                    # print(str(k) + ' :: ' + str(v))
+                    if 'plugin.video.catchuptvandmore' in str(v) and \
+                            'plugin.video.catchuptvandmore/addon.py' not in str(v):
+                        # print('\tRELOAD')
+                        reload(v)
+                reload(addon)
 
             # Simulate the addon execution
             addon.main()
@@ -80,17 +95,20 @@ def main():
                 print(error)
                 RuntimeErrorCQ.reset_error_trigger()
 
-                if Config.get('exit_on_error'):
+                if len(RuntimeErrorCQ.all_errors) >= Config.get('exit_after_x_errors'):
+                    print('[DEBUG] Max number of error reached ({}) --> Exit'.format(Config.get('exit_after_x_errors')))
                     next_item = -1
                 else:
+                    print('[DEBUG] Max number of error not reached --> Go back')
                     next_item = 0
 
 
             # Else if the current directory is a playable item
             elif Directory.is_current_directory_playable():
-                item = Directory.current_directory.items[0]
+                item = Directory.current_directory.items[1]
                 print('PLAYABLE URL: {}'.format(item.url))
                 next_item = 0
+
 
             # Else print the current directory
             else:
@@ -101,6 +119,22 @@ def main():
                 # If the entry_point was not reached we follow the entry point path
                 if not entry_point_reached:
                     next_item = Config.get('entry_point')[len(current_route.path)]
+
+
+                # Else if we are in auto exploration
+                elif Config.get('auto_exploration'):
+                    print('[DEBUG] Auto exploration')
+                    # If needed, add items of the current menu to explore later
+                    AutoExploration.add_items_current_menu(current_route.path, Directory.current_directory.items)
+
+                    # We wait a fake time
+                    sys.stdout.flush()
+                    time.sleep(Config.get('wait_time'))
+
+                    # We ask for the next item to epxlore
+                    next_item = AutoExploration.next_item_to_explore(current_route.path)
+                    print('[DEBUG] next_item selected by auto exploration? ' + str(next_item))
+
 
                 # Else we ask the user to choose the next item number
                 else:
@@ -113,18 +147,22 @@ def main():
                     print('')
 
 
-            # If there is no item for this value, reload the same menu to prevent error
-            if next_item > len(Directory.current_directory.items) or (next_item == 0 and len(current_route.path) <= 1):
+            # Else if the user wants to exit the simulator, let's break the loop
+            if next_item == -1:
+                break
+
+            if Directory.current_directory is None:
                 next_item = -2
+
+            else:
+                # If there is no item for this value, reload the same menu to prevent error
+                if next_item > len(Directory.current_directory.items) or (next_item == 0 and len(current_route.path) <= 1):
+                    next_item = -2
 
 
             # If next_item has the default value just reload the same menu
             if next_item == -2:
                 pass
-
-            # Else if the user wants to exit the simulator, let's break the loop
-            elif next_item == -1:
-                break
 
             # Else if the user want to go back in the previous menu
             elif next_item == 0:
@@ -138,7 +176,10 @@ def main():
 
 
 
-
+    if Config.get('print_all_explored_items'):
+        print('\n* All explored items:\n')
+        for s in Route.explored_routes_l:
+            print(s)
 
     ret_val = RuntimeErrorCQ.print_encountered_errors()
     return ret_val

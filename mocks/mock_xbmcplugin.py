@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 
 import sys
 import mock
-import runtime
 
 from directory import Directory, Item
 from route import Route
@@ -34,6 +33,9 @@ def fake_add_directory_items(handle, items_qd, totalItems=0):
 
 
 def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDisc=True):
+    if updateListing:
+        print('UPDATE LISTING TO IMPLEMENT')
+        exit(-1)
     Directory.current_directory.succeeded = succeeded
     Directory.current_directory.update_listing = updateListing
 
@@ -45,7 +47,7 @@ def fake_set_resolve_url(handle, succeeded, listitem):
     item.url = listitem._path
     item.listitem = listitem
     item.is_folder = False
-    directory.items[0] = item
+    directory.items[1] = item
     Directory.current_directory = directory
 
 
