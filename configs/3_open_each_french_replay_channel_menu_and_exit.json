@@ -13,7 +13,7 @@
 
     "disable_kodi_log": false,
     "kodi_log_level": 0,
-    "disable_xbmcaddon_mock_log": false,
+    "disable_xbmcaddon_mock_log": true,
     "disable_xbmc_mock_log": false,
 
     "auto_exploration": true,

@@ -96,7 +96,9 @@ class FakeAddon(object):
 
     def getLocalizedString(self, _id):
         if not Config.get('disable_xbmcaddon_mock_log'):
-            print('[FakeAddon] getLocalizedString of "{}" --> "{}"'.format(_id, self._labels.get(id)))
+            print('[FakeAddon] getLocalizedString of "{}" --> "{}"'.format(_id, self._labels.get(_id)))
+        if _id not in self._labels:
+            print('[FakeAddon] getLocalizedString of "{}" --> "{}" error (missing key in strings.po?)'.format(_id, self._labels.get(_id)))
         return self._labels.get(_id, str(_id))
 
 
