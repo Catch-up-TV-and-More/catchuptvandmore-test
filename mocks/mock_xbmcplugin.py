@@ -11,9 +11,12 @@ import mock
 
 from directory import Directory, Item
 from route import Route
+from config import Config
 
 
 def fake_add_directory_items(handle, items_qd, totalItems=0):
+    if not Config.get('disable_xbmcplugin_mock_log'):
+        print('[FakePlugin] addDirectoryItems of {} items'.format(totalItems))
     directory = Directory()
     directory.path = Route.current_explored_route.path
 
@@ -33,14 +36,15 @@ def fake_add_directory_items(handle, items_qd, totalItems=0):
 
 
 def fake_end_of_directory(handle, succeeded=True, updateListing=False, cacheToDisc=True):
-    if updateListing:
-        print('UPDATE LISTING TO IMPLEMENT')
-        exit(-1)
+    if not Config.get('disable_xbmcplugin_mock_log'):
+        print('[FakePlugin] endOfDirectory(succeeded={}, updateListing={}, cacheToDisc={})'.format(succeeded, updateListing, cacheToDisc))
     Directory.current_directory.succeeded = succeeded
     Directory.current_directory.update_listing = updateListing
 
 
 def fake_set_resolve_url(handle, succeeded, listitem):
+    if not Config.get('disable_xbmcplugin_mock_log'):
+        print('[FakePlugin] setResolvedUrl: {}'.format(listitem._path))
     directory = Directory()
     directory.path = Route.current_explored_route.path
     item = Item()

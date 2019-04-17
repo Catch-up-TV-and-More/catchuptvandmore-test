@@ -52,6 +52,7 @@ class Config(metaclass=ConfigMC):
         log_group.add_argument('--disable-kodi-log', action='store_true', help='Disable stdout Kodi logging')
         log_group.add_argument('--kodi-log-level', type=int, default=0, help='Minimum Kodi log level to be logging')
         log_group.add_argument('--disable-xbmcaddon-mock-log', action='store_true', help='Disable log messages of xbmcaddon module functions calls')
+        log_group.add_argument('--disable-xbmcplugin-mock-log', action='store_true', help='Disable log messages of xbmcplugin module functions calls')
         log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')
 
 
@@ -63,6 +64,7 @@ class Config(metaclass=ConfigMC):
         auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
         auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore from the entry point')
         auto_exploration_group.add_argument('--exclude-paths', default='', help='List of paths exclude from the exploration(e.g. \'1-3, 1-2-1\')')
+        auto_exploration_group.add_argument('--skip-playable-items', action='store_true', help='Do not add playable items to the exploration stack')
 
         cls._config = vars(parser.parse_args())
 

@@ -1,0 +1,66 @@
+#!/bin/sh
+# https://gist.github.com/smoser/719f9be19eec08ab76d892cfcd95056d
+# curl -L http://c.brickies.net/haste > haste && chmod 755 haste
+Usage() {
+    cat <<EOF
+${0##*/} file|url
+   hastebin.com client.
+   if url, get raw output to stdout.
+   if file or '-', post file to hastebin
+   When pasting, use '-r' or '--raw' to return a url to raw paste.
+EOF
+}
+
+put() {
+    local url="$1" file="$2" output=${3:-"raw"} out=""
+    [ -z "$file" ] && file="-"
+    case "$url" in
+        */documents/|*/documents) url=${url%/}; url=${url%documents/};;
+    esac
+    purl="${url}documents/"
+    if ! out=$(curl -X POST --fail --silent \
+             --data-binary "@$file" "$purl" 2>&1); then
+        echo "failed posting to $url" 1>&2
+        echo "$out" 1>&2
+        return 1
+    fi
+    # output is json, looks like: {"key":"felogaqeto"}
+    local q='"' fmt='{"key":"*"}' val=""
+    case "$out" in
+        $fmt) val=${out#*:$q}; val=${val%$q\}};;
+        *) echo "confused by output: $out" 1>&2; exit 2;;
+    esac
+    if [ "$output" = "both" ]; then
+        echo "${url%/}/$val"
+    fi
+    echo "${url%/}/raw/${val}"
+    return 0
+}
+
+get() {
+    local url="$1" t=""
+    # raw urls are <base>/raw/<key>
+    case "$url" in
+        */raw/*) :;;
+        *) url=${url%/}; url=${url%/*}/raw/${url##*/};;
+    esac
+    curl --fail --silent "$url"
+}
+
+[ "$1" = "-h" -o "$1" = "--help" ] && { Usage; exit 0; }
+
+url="https://hastebin.com/"
+
+if [ "$1" = "-r" -o "$1" = "--raw" ]; then
+    output="raw"
+elif [ -t 1 ]; then
+    output="both"
+fi
+
+case "$1" in
+    https://*|http://*) get "$1";;
+    *) put "$url" "$1" "$output";;
+    *) Usage 1>&2; exit 1;;
+esac
+
+# vi: ts=4 expandtab

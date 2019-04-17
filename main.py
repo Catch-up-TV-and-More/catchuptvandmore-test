@@ -62,7 +62,7 @@ def main():
 
         # Check if the entry point was reached
         if current_route.path == Config.get('entry_point'):
-            print('[DEBUG] Entry point reached: ' + str(Config.get('entry_point')))
+            print('[DEBUG] Entry point ({}) reached'.format(Config.get('entry_point')))
             entry_point_reached = True
 
         # Hock sys.argv
@@ -119,21 +119,22 @@ def main():
                 # If the entry_point was not reached we follow the entry point path
                 if not entry_point_reached:
                     next_item = Config.get('entry_point')[len(current_route.path)]
+                    print('[DEBUG] Entry point not yet reached --> next item: {}'.format(next_item))
 
 
                 # Else if we are in auto exploration
                 elif Config.get('auto_exploration'):
-                    print('[DEBUG] Auto exploration')
+                    print('[DEBUG] Auto exploration mode')
                     # If needed, add items of the current menu to explore later
-                    AutoExploration.add_items_current_menu(current_route.path, Directory.current_directory.items)
+                    AutoExploration.add_items_current_menu(current_route.path, Directory.current_directory)
 
                     # We wait a fake time
                     sys.stdout.flush()
                     time.sleep(Config.get('wait_time'))
 
                     # We ask for the next item to epxlore
-                    next_item = AutoExploration.next_item_to_explore(current_route.path)
-                    print('[DEBUG] next_item selected by auto exploration? ' + str(next_item))
+                    next_item = AutoExploration.next_item_to_explore(current_route.path, Directory.current_directory)
+                    print('[DEBUG] next_item selected by auto exploration: {}'.format(next_item))
 
 
                 # Else we ask the user to choose the next item number
@@ -142,6 +143,8 @@ def main():
                     try:
                         sys.stdout.flush()
                         next_item = int(input('Next item to select? (-1 to exit, <enter> to reload same directory)\n'))
+                        print('[DEBUG] choosen next_item: {}'.format(next_item))
+
                     except Exception:
                         pass
                     print('')

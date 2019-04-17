@@ -1,0 +1,26 @@
+{
+
+    "_comment": "Config file to open each french replay channel and explore as deep as possible (but skip playable items)",
+
+    "addon_path": "../plugin.video.catchuptvandmore",
+    "entry_point": "1-2-1",
+    "exit_after_x_errors": 5,
+    "disable_video_player": true,
+    "kodi_version": "LEIA",
+    "print_all_explored_items": true,
+    "disable_image_check": true,
+    "autoreload_addon": false,
+
+    "disable_kodi_log": false,
+    "kodi_log_level": 0,
+    "disable_xbmcaddon_mock_log": true,
+    "disable_xbmc_mock_log": true,
+
+    "auto_exploration": true,
+    "max_items_per_menu": -1,
+    "wait_time": 0.0,
+    "max_items_to_explore": -1,
+    "exploration_strategy": "RANDOM",
+    "max_depth": -1,
+    "skip_playable_items": true
+}
