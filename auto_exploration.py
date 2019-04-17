@@ -28,8 +28,8 @@ class AutoExploration:
 
 
         # Else we can add items to explore
-        items_key = []
 
+        # Firstly we create our iterator accroding to the config
         max_index = len(current_menu_items)
         if Config.get('max_items_per_menu') != -1 and Config.get('max_items_per_menu') < max_index:
             max_index = Config.get('max_items_per_menu')
@@ -47,9 +47,15 @@ class AutoExploration:
                 if r not in iterator:
                     iterator.append(r)
 
+        items_key = []
         for i in iterator:
-            print('NEXT ITEM TO VISIT: ' + str(i))
-            items_key.append(i)
+            candidate_path = list(current_path)
+            candidate_path.append(i)
+            if candidate_path in Config.get('exclude_paths'):
+                print('[DEBUG add items current menu auto exploration] Do not add item {} to explore because it is in exclude list'.format(i))
+            else:
+                print('[DEBUG add items current menu auto exploration] Add item {} to explore'.format(i))
+                items_key.append(i)
 
         cls.items_to_explore[str(current_path)] = items_key
 

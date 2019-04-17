@@ -62,6 +62,7 @@ class Config(metaclass=ConfigMC):
         auto_exploration_group.add_argument('--max-items-to-explore', type=int, default=-1, help='Limit the total number of item to explore')
         auto_exploration_group.add_argument('--exploration-strategy', default='RANDOM', choices=['RANDOM', 'FIRST', 'LAST'], help='How to add items of explored menus to the stack to the stack of item to explore')
         auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore from the entry point')
+        auto_exploration_group.add_argument('--exclude-paths', default='', help='List of paths exclude from the exploration(e.g. \'1-3, 1-2-1\')')
 
         cls._config = vars(parser.parse_args())
 
@@ -111,6 +112,17 @@ class Config(metaclass=ConfigMC):
         for item_key in cls._config['entry_point'].split('-'):
             entry_point.append(int(item_key))
         cls._config['entry_point'] = entry_point
+
+        # We convert the exclude string to a list of list
+        exclude_paths = []
+        if cls._config['exclude_paths'] != '':
+            exclude_paths_s = "".join(cls._config['exclude_paths'].split())
+            for exclude in exclude_paths_s.split(','):
+                exclude_path = []
+                for item in exclude.split('-'):
+                    exclude_path.append(int(item))
+                exclude_paths.append(exclude_path)
+        cls._config['exclude_paths'] = exclude_paths
 
         # We move max depth according to the entry point
         if cls._config['max_depth'] != -1:
