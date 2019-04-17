@@ -57,6 +57,7 @@ def main():
     Route.add_route_to_explore(root)
 
     while(Route.continue_epxloration()):
+        print('\n[DEBUG] Loop entry')
 
         current_route = Route.get_route_to_explore()
 
@@ -101,6 +102,11 @@ def main():
                 else:
                     print('[DEBUG] Max number of error not reached --> Go back')
                     next_item = 0
+
+            # Else if succeeded is False (Happen when "No video found" notif is trigger)
+            elif Directory.current_directory.succeeded is False:
+                print('[DEBUG] endOfDirectory was called with succeeded=False --> Go back')
+                next_item = 0
 
 
             # Else if the current directory is a playable item
