@@ -82,6 +82,9 @@ def main():
                         reload(v)
                 reload(addon)
 
+            # We need to clean this var
+            RuntimeErrorCQ.last_error_message = ""
+
             # Simulate the addon execution
             addon.main()
 

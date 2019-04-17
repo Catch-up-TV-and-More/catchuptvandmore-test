@@ -4,6 +4,7 @@ import sys
 import mock
 
 from config import Config
+from runtime_error import RuntimeErrorCQ
 
 LOGDEBUG = 0
 LOGERROR = 4
@@ -18,6 +19,7 @@ LOGWARNING = 3
 def fake_log(msg, level=LOGDEBUG):
     if not Config.get('disable_kodi_log') and level >= Config.get('kodi_log_level'):
         print('[FakeKodiLog level {}] {}'.format(level, msg))
+    RuntimeErrorCQ.last_error_message += msg
     pass
 
 

@@ -49,7 +49,7 @@ class RuntimeErrorCQ:
         s += '* Path: {}'.format(self.pp_path) + '\n'
         s += '* Route: {}'.format(self.route) + '\n'
         s += '* Params: {}'.format(self.params) + '\n'
-        s += '* Message: {}'.format(self.msg) + '\n'
+        s += '* Message: \n{}'.format(self.msg) + '\n'
         return s
 
 

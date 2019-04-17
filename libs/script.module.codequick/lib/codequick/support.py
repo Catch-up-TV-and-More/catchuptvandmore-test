@@ -304,7 +304,7 @@ class Dispatcher(object):
             dialog.notification(e.__class__.__name__, msg, addon_data.getAddonInfo("icon"))
             logger.critical(msg, exc_info=1)
 
-            RuntimeErrorCQ.last_error_message = msg
+            # RuntimeErrorCQ.last_error_message = msg
             RuntimeErrorCQ.last_menu_triggered_error = True
 
         else:
