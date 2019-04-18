@@ -78,9 +78,8 @@ class AutoExploration:
             return -1
 
         # If we are at the entry point
-        if current_path == Config.get('entry_point'):
+        if len(current_path) == len(Config.get('entry_point')):
             # print('[DEBUG next item auto exploration] Entry point all items done --> -1')
-
             if str(current_path) in cls.items_to_explore and \
                     cls.items_to_explore[str(current_path)] == []:
 

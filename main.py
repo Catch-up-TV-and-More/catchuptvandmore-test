@@ -6,6 +6,7 @@ import sys
 import mock
 from importlib import reload
 import time
+from random import randint
 
 # User modules imports
 from config import Config
@@ -62,7 +63,7 @@ def main():
         current_route = Route.get_route_to_explore()
 
         # Check if the entry point was reached
-        if current_route.path == Config.get('entry_point'):
+        if len(current_route.path) == len(Config.get('entry_point')) and not entry_point_reached:
             print('[DEBUG] Entry point ({}) reached'.format(Config.get('entry_point')))
             entry_point_reached = True
 
@@ -128,8 +129,12 @@ def main():
                 # If the entry_point was not reached we follow the entry point path
                 if not entry_point_reached:
                     next_item = Config.get('entry_point')[len(current_route.path)]
-                    print('[DEBUG] Entry point not yet reached --> next item: {}'.format(next_item))
-
+                    if next_item == 'R':
+                        next_item = randint(1, len(Directory.current_directory.items))
+                        print('[DEBUG] Entry point not yet reached --> random next item: {}'.format(next_item))
+                    else:
+                        next_item = int(next_item)
+                        print('[DEBUG] Entry point not yet reached --> next item: {}'.format(next_item))
 
                 # Else if we are in auto exploration
                 elif Config.get('auto_exploration'):

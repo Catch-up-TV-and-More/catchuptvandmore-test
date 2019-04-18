@@ -112,7 +112,7 @@ class Config(metaclass=ConfigMC):
         # We convert the entry point to a list
         entry_point = []
         for item_key in cls._config['entry_point'].split('-'):
-            entry_point.append(int(item_key))
+            entry_point.append(item_key)
         cls._config['entry_point'] = entry_point
 
         # We convert the exclude string to a list of list
