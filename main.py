@@ -198,6 +198,7 @@ def main():
         for s in Route.explored_routes_l:
             print(s)
 
+    RuntimeErrorCQ.print_encountered_warnings()
     ret_val = RuntimeErrorCQ.print_encountered_errors()
     return ret_val
 

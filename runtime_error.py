@@ -14,6 +14,7 @@ class RuntimeErrorCQ:
     last_codequick_callback_params = ''
 
     all_errors = []
+    all_warnings = []
 
     @classmethod
     def reset_error_trigger(cls):
@@ -37,12 +38,30 @@ class RuntimeErrorCQ:
         return 1
 
 
+    @classmethod
+    def print_encountered_warnings(cls):
+        if len(cls.all_warnings) == 0:
+            print('\n* No warning encountered')
+            return 0
+
+        print('\n* Encountered warnings list:\n')
+        cnt = 0
+        for error in cls.all_warnings:
+            print('\t- Warning %s' % cnt)
+            print(error)
+            cnt += 1
+        return 1
+
+
     def __init__(self, path):
         self.route = RuntimeErrorCQ.last_codequick_route
         self.params = dict(RuntimeErrorCQ.last_codequick_callback_params)
         self.msg = RuntimeErrorCQ.last_error_message
         self.pp_path = str(path)
-        RuntimeErrorCQ.all_errors.append(self)
+        if 'RuntimeError: No items found' in self.msg:
+            RuntimeErrorCQ.all_warnings.append(self)
+        else:
+            RuntimeErrorCQ.all_errors.append(self)
 
     def __str__(self):
         s = ''
