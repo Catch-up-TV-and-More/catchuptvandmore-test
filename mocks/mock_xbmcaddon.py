@@ -12,40 +12,46 @@ from config import Config
 ADDONS_SETTINGS = {
     'plugin.video.catchuptvandmore': Config.get('addon_settings'),
     'script.module.codequick': Config.get('codequick_fake_settings'),
-    'script.module.inputstreamhelper': Config.get('inputstreamhelper_fake_settings')
+    'script.module.inputstreamhelper': Config.get('inputstreamhelper_fake_settings'),
+    'script.module.youtube.dl': Config.get('youtubedl_fake_settings')
 }
 
 
 ADDONS_LABELS = {
     'plugin.video.catchuptvandmore': Config.get('addon_labels'),
     'script.module.codequick': Config.get('codequick_labels'),
-    'script.module.inputstreamhelper': Config.get('inputstreamhelper_labels')
+    'script.module.inputstreamhelper': Config.get('inputstreamhelper_labels'),
+    'script.module.youtube.dl': Config.get('youtubedl_labels')
 }
 
 
 ADDONS_NAMES = {
     'plugin.video.catchuptvandmore': 'Catch-up TV & More',
     'script.module.codequick': 'CodeQuick',
-    'script.module.inputstreamhelper': 'InputStream Helper'
+    'script.module.inputstreamhelper': 'InputStream Helper',
+    'script.module.youtube.dl': 'Youtube-dl'
 }
 
 
 ADDONS_PATHS = {
     'plugin.video.catchuptvandmore': Config.get('addon_path'),
     'script.module.codequick': Config.get('codequick_addon_path'),
-    'script.module.inputstreamhelper': Config.get('inputstreamhelper_addon_path')
+    'script.module.inputstreamhelper': Config.get('inputstreamhelper_addon_path'),
+    'script.module.youtube.dl': Config.get('youtubedl_addon_path')
 }
 
 ADDONS_FANARTS = {
     'plugin.video.catchuptvandmore': Config.get('addon_fanart_filepath'),
     'script.module.codequick': Config.get('codequick_fanart_filepath'),
-    'script.module.inputstreamhelper': Config.get('inputstreamhelper_fanart_filepath')
+    'script.module.inputstreamhelper': Config.get('inputstreamhelper_fanart_filepath'),
+    'script.module.youtube.dl': Config.get('youtubedl_fanart_filepath')
 }
 
 ADDONS_ICONS = {
     'plugin.video.catchuptvandmore': Config.get('addon_icon_filepath'),
     'script.module.codequick': Config.get('codequick_icon_filepath'),
-    'script.module.inputstreamhelper': Config.get('inputstreamhelper_icon_filepath')
+    'script.module.inputstreamhelper': Config.get('inputstreamhelper_icon_filepath'),
+    'script.module.youtube.dl': Config.get('youtubedl_icon_filepath')
 }
 
 
@@ -83,7 +89,7 @@ class FakeAddon(object):
 
     def getSetting(self, setting_id):
         if setting_id not in self._settings:
-            print('[FakeAddon] Missing setting_id "{}" in ADDON_FAKE_SETTINGS (config.py)'.format(setting_id))
+            print('[FakeAddon] Missing setting_id "{}" in {} settings (config.py)'.format(setting_id, self._id))
             exit(-1)
         if not Config.get('disable_xbmcaddon_mock_log'):
             print('[FakeAddon] getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))

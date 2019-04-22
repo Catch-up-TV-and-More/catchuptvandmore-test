@@ -10,6 +10,32 @@ import polib
 CWD_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
+def parse_settings_xml(settings_xml_filepath):
+    settings = {}
+    xml = ET.parse(settings_xml_filepath)
+    for child in xml.iter():
+        if child.tag == "setting":
+            if 'id' in child.attrib:
+                value = ''
+                # print(child.attrib)
+                if 'type' in child.attrib and child.attrib['type'] == 'folder':
+                    value = '/tmp'
+                if 'default' in child.attrib:
+                    value = child.attrib['default']
+                settings[child.attrib['id']] = value
+    return settings
+
+
+def parse_strings_po(strings_po_filepath):
+    labels = {}
+    po = polib.pofile(strings_po_filepath)
+    for entry in po:
+        key = entry.msgctxt
+        key = int(key.replace('#', ''))
+        labels[key] = entry.msgid
+    return labels
+
+
 class ConfigMC(type):
 
     def __str__(cls):
@@ -28,7 +54,6 @@ class Config(metaclass=ConfigMC):
     @classmethod
     def get(cls, item):
         return cls._config[item]
-
 
 
     @classmethod
@@ -94,16 +119,23 @@ class Config(metaclass=ConfigMC):
         cls._config['addon_icon_filepath'] = os.path.join(cls._config['addon_path'], 'icon.png')
         cls._config['addon_en_strings_po_filepath'] = os.path.join(cls._config['addon_path'], "resources", "language", "resource.language.en_gb", "strings.po")
 
-
         cls._config['codequick_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.codequick', 'lib')
         cls._config['codequick_addon_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.codequick')
         cls._config['codequick_fanart_filepath'] = os.path.join(cls._config['codequick_addon_path'], 'fanart.jpg')
         cls._config['codequick_icon_filepath'] = os.path.join(cls._config['codequick_addon_path'], 'icon.png')
+        cls._config['codequick_en_strings_po_filepath'] = os.path.join(cls._config['codequick_addon_path'], "resources", "language", "resource.language.en_gb", "strings.po")
 
         cls._config['inputstreamhelper_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.inputstreamhelper', 'lib')
         cls._config['inputstreamhelper_addon_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.inputstreamhelper')
         cls._config['inputstreamhelper_fanart_filepath'] = os.path.join(cls._config['inputstreamhelper_addon_path'], 'fanart.jpg')
         cls._config['inputstreamhelper_icon_filepath'] = os.path.join(cls._config['inputstreamhelper_addon_path'], 'icon.png')
+        cls._config['inputstreamhelper_en_strings_po_filepath'] = os.path.join(cls._config['inputstreamhelper_addon_path'], "resources", "language", "resource.language.en_gb", "strings.po")
+
+        cls._config['youtubedl_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.youtube.dl', 'lib')
+        cls._config['youtubedl_addon_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.youtube.dl')
+        cls._config['youtubedl_fanart_filepath'] = ''
+        cls._config['youtubedl_icon_filepath'] = os.path.join(cls._config['youtubedl_addon_path'], 'icon.png')
+        cls._config['youtubedl_en_strings_po_filepath'] = os.path.join(cls._config['youtubedl_addon_path'], "resources", "language", "English", "strings.po")
 
         # Fake Kodi/userdata/addon_data/plugin.video.catchuptvandmore
         cls._config['userdata_path'] = os.path.join(CWD_PATH, 'fake_userdata')
@@ -131,45 +163,23 @@ class Config(metaclass=ConfigMC):
             cls._config['max_depth'] = cls._config['max_depth'] + len(cls._config['entry_point']) -1
 
 
-        # Parse settings.xml file
-        cls._config['addon_settings'] = {}
-
+        # Parse settings.xml files
         addon_settings_filepath = os.path.join(Config.get('addon_path'), "resources", "settings.xml")
-        xml = ET.parse(addon_settings_filepath)
-        for child in xml.iter():
-            if child.tag == "setting":
-                if 'id' in child.attrib:
-                    value = ''
-                    # print(child.attrib)
-                    if child.attrib['type'] == 'folder':
-                        value = '/tmp'
-                    else:
-                        value = child.attrib['default']
-                    cls._config['addon_settings'][child.attrib['id']] = value
-
+        cls._config['addon_settings'] = parse_settings_xml(addon_settings_filepath)
 
         cls._config['codequick_fake_settings'] = {}
-        cls._config['inputstreamhelper_fake_settings'] = {}
 
+        inputstreamhelper_settings_filepath = os.path.join(Config.get('inputstreamhelper_addon_path'), "resources", "settings.xml")
+        cls._config['inputstreamhelper_fake_settings'] = parse_settings_xml(inputstreamhelper_settings_filepath)
 
-        # Parse english strings.po
-        # in order to recover labels
-        # Key format: 30500
-        # Value format: "France"
-        cls._config['addon_labels'] = {}
-        po = polib.pofile(Config.get('addon_en_strings_po_filepath'))
-        for entry in po:
-            key = entry.msgctxt
-            key = int(key.replace('#', ''))
-            cls._config['addon_labels'][key] = entry.msgid
+        youtubedl_settings_filepath = os.path.join(Config.get('youtubedl_addon_path'), "resources", "settings.xml")
+        cls._config['youtubedl_fake_settings'] = parse_settings_xml(youtubedl_settings_filepath)
 
-
-        cls._config['codequick_labels'] = {
-            33078: 'Next page'
-        }
-
-
-        cls._config['inputstreamhelper_labels'] = {}
+        # Parse english strings.po files
+        cls._config['addon_labels'] = parse_strings_po(Config.get('addon_en_strings_po_filepath'))
+        cls._config['codequick_labels'] = parse_strings_po(Config.get('codequick_en_strings_po_filepath'))
+        cls._config['inputstreamhelper_labels'] = parse_strings_po(Config.get('inputstreamhelper_en_strings_po_filepath'))
+        cls._config['youtubedl_labels'] = parse_strings_po(Config.get('youtubedl_en_strings_po_filepath'))
 
 
 
