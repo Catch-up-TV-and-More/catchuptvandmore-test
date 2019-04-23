@@ -180,6 +180,8 @@ class Config(metaclass=ConfigMC):
         cls._config['codequick_labels'] = parse_strings_po(Config.get('codequick_en_strings_po_filepath'))
         cls._config['inputstreamhelper_labels'] = parse_strings_po(Config.get('inputstreamhelper_en_strings_po_filepath'))
         cls._config['youtubedl_labels'] = parse_strings_po(Config.get('youtubedl_en_strings_po_filepath'))
+        cls._config['xbmc_labels'] = parse_strings_po(os.path.join(CWD_PATH, "mocks", "strings.po"))
+
 
 
 

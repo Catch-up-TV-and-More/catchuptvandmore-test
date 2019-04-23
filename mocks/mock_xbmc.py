@@ -40,12 +40,10 @@ def fake_get_info_label(id_):
 
 def get_localized_string(id_):
     result = str(id_)
-    if id_ in Config.get('addon_labels'):
-        result = Config.get('addon_labels')[id_]
-    elif id_ in Config.get('codequick_labels'):
-        result = Config.get('codequick_labels')[id_]
+    if id_ in Config.get('xbmc_labels'):
+        result = Config.get('xbmc_labels')[id_]
     if not Config.get('disable_xbmc_mock_log'):
-        print('[FakeAddon] getLocalizedString of {} --> "{}"'.format(id_, result))
+        print('[FakeXBMC] getLocalizedString of "{}" --> "{}"'.format(id_, result))
     return result
 
 

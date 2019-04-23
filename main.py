@@ -7,6 +7,7 @@ import mock
 from importlib import reload
 import time
 from random import randint
+import signal
 
 # User modules imports
 from config import Config
@@ -18,19 +19,10 @@ from auto_exploration import AutoExploration
 WARNING = u'\U000026A0'
 
 
-def main():
 
-    print('')
-    print('#######################################')
-    print('#                                     #')
-    print('#     Catch-up TV & More simulator    #')
-    print('#                                     #')
-    print('#######################################')
-    print('')
-
-    # Get config
-    Config.init_config()
-    # print(Config)
+def modules_import():
+    # Add youtube_dl module to python path
+    sys.path.append(Config.get('youtubedl_path'))
 
     # Add codequick module to python path
     sys.path.append(Config.get('codequick_path'))
@@ -49,6 +41,10 @@ def main():
     import mocks.mock_xbmcvfs
     # import mocks.mock_youtube_dl
 
+    return
+
+
+def exploration_loop():
     import addon
 
     entry_point_reached = False
@@ -192,6 +188,44 @@ def main():
                 Route.add_item_to_explore(selected_item)
 
 
+class Timeout():
+    """Timeout class using ALARM signal."""
+    class Timeout(Exception):
+        pass
+
+    def __init__(self, sec):
+        self.sec = sec
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.raise_timeout)
+        signal.alarm(self.sec)
+
+    def __exit__(self, *args):
+        signal.alarm(0)    # disable alarm
+
+    def raise_timeout(self, *args):
+        raise Timeout.Timeout()
+
+
+def main():
+
+    print('')
+    print('#######################################')
+    print('#                                     #')
+    print('#     Catch-up TV & More simulator    #')
+    print('#                                     #')
+    print('#######################################')
+    print('')
+
+    # Get config
+    Config.init_config()
+    # print(Config)
+
+    # import all necessary modules
+    modules_import()
+
+    exploration_loop()
+
 
     if Config.get('print_all_explored_items'):
         print('\n* All explored items:\n')
@@ -201,8 +235,6 @@ def main():
     RuntimeErrorCQ.print_encountered_warnings()
     ret_val = RuntimeErrorCQ.print_encountered_errors()
     return ret_val
-
-
 
 
 if __name__ == '__main__':

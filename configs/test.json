@@ -3,7 +3,7 @@
     "_comment": "Test",
 
     "addon_path": "../plugin.video.catchuptvandmore",
-    "entry_point": "1-2-4-3-1",
+    "entry_point": "1-2-11-1",
     "exit_after_x_errors": 1,
     "disable_video_player": true,
     "kodi_version": "LEIA",

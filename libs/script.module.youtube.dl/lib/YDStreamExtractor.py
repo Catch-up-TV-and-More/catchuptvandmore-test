@@ -1,7 +1,13 @@
 import urllib
 import os
-import urlparse
-import httplib
+try:
+    import urlparse
+except:
+    import urllib.parse as urlparse
+try:
+    import httplib
+except:
+    import http.client as httplib
 import time
 import xbmc
 
@@ -52,92 +58,92 @@ def _getQualityLimits(quality):
 
 
 def _selectVideoQuality(r, quality=None):
-        if quality is None:
-            quality = util.getSetting('video_quality', 1)
+    if quality is None:
+        quality = util.getSetting('video_quality', 1)
 
-        disable_dash = util.getSetting('disable_dash_video', True)
-        skip_no_audio = util.getSetting('skip_no_audio', True)
+    disable_dash = util.getSetting('disable_dash_video', True)
+    skip_no_audio = util.getSetting('skip_no_audio', True)
 
-        entries = r.get('entries') or [r]
+    entries = r.get('entries') or [r]
 
-        minHeight, maxHeight = _getQualityLimits(quality)
+    minHeight, maxHeight = _getQualityLimits(quality)
 
-        util.LOG('Quality: {0}'.format(quality), debug=True)
-        urls = []
-        idx = 0
-        for entry in entries:
-            defFormat = None
-            defMax = 0
-            defPref = -1000
-            prefFormat = None
-            prefMax = 0
-            prefPref = -1000
+    util.LOG('Quality: {0}'.format(quality), debug=True)
+    urls = []
+    idx = 0
+    for entry in entries:
+        defFormat = None
+        defMax = 0
+        defPref = -1000
+        prefFormat = None
+        prefMax = 0
+        prefPref = -1000
 
-            index = {}
-            formats = entry.get('formats') or [entry]
+        index = {}
+        formats = entry.get('formats') or [entry]
 
-            for i in range(len(formats)):
-                index[formats[i]['format_id']] = i
+        for i in range(len(formats)):
+            index[formats[i]['format_id']] = i
 
-            keys = sorted(index.keys())
-            fallback = formats[index[keys[0]]]
-            for fmt in keys:
-                fdata = formats[index[fmt]]
+        keys = sorted(index.keys())
+        fallback = formats[index[keys[0]]]
+        for fmt in keys:
+            fdata = formats[index[fmt]]
 
-                if 'height' not in fdata:
-                    continue
-                elif disable_dash and 'dash' in fdata.get('format_note', '').lower():
-                    continue
-                elif skip_no_audio and fdata.get('acodec', '').lower() == 'none':
-                    continue
+            if 'height' not in fdata:
+                continue
+            elif disable_dash and 'dash' in fdata.get('format_note', '').lower():
+                continue
+            elif skip_no_audio and fdata.get('acodec', '').lower() == 'none':
+                continue
 
-                h = fdata['height']
-                if h == None:
-                   h = 1
-                p = fdata.get('preference', 1)
-                if p == None:
-                   p = 1
-                if h >= minHeight and h <= maxHeight:
-                    if (h >= prefMax and p > prefPref) or (h > prefMax and p >= prefPref):
-                        prefMax = h
-                        prefPref = p
-                        prefFormat = fdata
-                elif(h >= defMax and h <= maxHeight and p > defPref) or (h > defMax and h <= maxHeight and p >= defPref):
-                        defMax = h
-                        defFormat = fdata
-                        defPref = p
-            formatID = None
-            if prefFormat:
-                info = prefFormat
-                logBase = '[{3}] Using Preferred Format: {0} ({1}x{2})'
-            elif defFormat:
-                info = defFormat
-                logBase = '[{3}] Using Default Format: {0} ({1}x{2})'
-            else:
-                info = fallback
-                logBase = '[{3}] Using Fallback Format: {0} ({1}x{2})'
-            url = info['url']
-            formatID = info['format_id']
-            util.LOG(logBase.format(formatID, info.get('width', '?'), info.get('height', '?'), entry.get('title', '').encode('ascii', 'replace')), debug=True)
-            if url.find("rtmp") == -1:
-                url += '|' + urllib.urlencode({'User-Agent': entry.get('user_agent') or YoutubeDLWrapper.std_headers['User-Agent']})
-            else:
-                url += ' playpath='+fdata['play_path']
-            new_info = dict(entry)
-            new_info.update(info)
-            urls.append(
-                {
-                    'xbmc_url': url,
-                    'url': info['url'],
-                    'title': entry.get('title', ''),
-                    'thumbnail': entry.get('thumbnail', ''),
-                    'formatID': formatID,
-                    'idx': idx,
-                    'ytdl_format': new_info
-                }
-            )
-            idx += 1
-        return urls
+            h = fdata['height']
+            if h == None:
+               h = 1
+            p = fdata.get('preference', 1)
+            if p == None:
+               p = 1
+            if h >= minHeight and h <= maxHeight:
+                if (h >= prefMax and p > prefPref) or (h > prefMax and p >= prefPref):
+                    prefMax = h
+                    prefPref = p
+                    prefFormat = fdata
+            elif(h >= defMax and h <= maxHeight and p > defPref) or (h > defMax and h <= maxHeight and p >= defPref):
+                    defMax = h
+                    defFormat = fdata
+                    defPref = p
+        formatID = None
+        if prefFormat:
+            info = prefFormat
+            logBase = '[{3}] Using Preferred Format: {0} ({1}x{2})'
+        elif defFormat:
+            info = defFormat
+            logBase = '[{3}] Using Default Format: {0} ({1}x{2})'
+        else:
+            info = fallback
+            logBase = '[{3}] Using Fallback Format: {0} ({1}x{2})'
+        url = info['url']
+        formatID = info['format_id']
+        util.LOG(logBase.format(formatID, info.get('width', '?'), info.get('height', '?'), entry.get('title', '').encode('ascii', 'replace')), debug=True)
+        if url.find("rtmp") == -1:
+            url += '|' + urllib.urlencode({'User-Agent': entry.get('user_agent') or YoutubeDLWrapper.std_headers['User-Agent']})
+        else:
+            url += ' playpath='+fdata['play_path']
+        new_info = dict(entry)
+        new_info.update(info)
+        urls.append(
+            {
+                'xbmc_url': url,
+                'url': info['url'],
+                'title': entry.get('title', ''),
+                'thumbnail': entry.get('thumbnail', ''),
+                'formatID': formatID,
+                'idx': idx,
+                'ytdl_format': new_info
+            }
+        )
+        idx += 1
+    return urls
 
 
 # Recursively follow redirects until there isn't a location header
@@ -415,7 +421,7 @@ def download(info, path, template='%(title)s-%(id)s.%(ext)s'):
     try:
         AddonSignals.sendSignal('download.started', signalPayload, sourceID='script.module.youtube.dl')
         YoutubeDLWrapper.download(info)
-    except YoutubeDLWrapper.youtube_dl.DownloadError, e:
+    except YoutubeDLWrapper.youtube_dl.DownloadError as e:
         return DownloadResult(False, e.message, filepath=ytdl._lastDownloadedFilePath)
     except YoutubeDLWrapper.DownloadCanceledException:
         return DownloadResult(False, status='canceled', filepath=ytdl._lastDownloadedFilePath)
