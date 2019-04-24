@@ -82,6 +82,9 @@ class FakeListItem(object):
     def addContextMenuItems(self, items, replaceItems=False):
         self._context_menu = items
 
+    def setContentLookup(self, enable):
+        pass
+
 
 mock_xbmcgui = mock.MagicMock()
 mock_xbmcgui.ListItem.side_effect = FakeListItem

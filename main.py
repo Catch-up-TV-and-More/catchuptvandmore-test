@@ -23,7 +23,7 @@ WARNING = u'\U000026A0'
 
 def modules_import():
     # Add youtube_dl module to python path
-    sys.path.append(Config.get('youtubedl_path'))
+    # sys.path.append(Config.get('youtubedl_path'))
 
     # Add codequick module to python path
     sys.path.append(Config.get('codequick_path'))
@@ -40,7 +40,7 @@ def modules_import():
     import mocks.mock_xbmcplugin
     import mocks.mock_xbmcgui
     import mocks.mock_xbmcvfs
-    # import mocks.mock_youtube_dl
+    import mocks.mock_youtube_dl
 
     return
 
@@ -104,18 +104,16 @@ def exploration_loop():
                     print('[DEBUG] Max number of error not reached --> Go back')
                     next_item = 0
 
-            # Else if succeeded is False (Happen when "No video found" notif is trigger)
-            elif Directory.current_directory.succeeded is False:
-                print('[DEBUG] endOfDirectory was called with succeeded=False --> Go back')
-                next_item = 0
-
-
             # Else if the current directory is a playable item
             elif Directory.is_current_directory_playable():
                 item = Directory.current_directory.items[1]
                 print('PLAYABLE URL: {}'.format(item.url))
                 next_item = 0
 
+            # Else if succeeded is False (Happen when "No video found" notif is trigger)
+            elif Directory.current_directory.succeeded is False:
+                print('[DEBUG] endOfDirectory was called with succeeded=False --> Go back')
+                next_item = 0
 
             # Else print the current directory
             else:
