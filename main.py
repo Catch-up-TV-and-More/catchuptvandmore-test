@@ -16,6 +16,7 @@ from route import Route
 from directory import Directory
 from runtime_error import RuntimeErrorCQ
 from auto_exploration import AutoExploration
+from player import Player
 
 WARNING = u'\U000026A0'
 
@@ -109,6 +110,9 @@ def exploration_loop():
                 item = Directory.current_directory.items[1]
                 print('PLAYABLE URL: {}'.format(item.url))
                 next_item = 0
+                if not Config.get('disable_video_player'):
+                    player = Player(item.url)
+                    player.play()
 
             # Else if succeeded is False (Happen when "No video found" notif is trigger)
             elif Directory.current_directory.succeeded is False:
