@@ -55,15 +55,11 @@ class FakeKeyboard(object):
         pass
 
     def getText(self):
-        # if CONFIG['auto_exploration']:
-        #     return "Chien"
-        # else:
-        #     try:
-        #         entry = raw_input("Kodi keyboard entry: ")
-        #         return entry
-        #     except Exception:
-        #         return ""
-        return
+        if Config.get('auto_exploration'):
+            return "Chien"
+        else:
+            entry = input("Kodi keyboard entry: ")
+            return entry
 
     def isConfirmed(self):
         return True
