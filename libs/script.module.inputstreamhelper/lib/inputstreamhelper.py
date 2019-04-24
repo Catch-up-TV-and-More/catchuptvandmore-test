@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 import requests
 
-import config
+import config_inputstreamhelper
 
 import xbmc
 import xbmcaddon
@@ -37,16 +37,16 @@ class Helper(object):
         self.protocol = protocol
         self.drm = drm
 
-        if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
+        if self.protocol not in config_inputstreamhelper.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
         else:
-            self.inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
+            self.inputstream_addon = config_inputstreamhelper.INPUTSTREAM_PROTOCOLS[self.protocol]
 
         if self.drm:
-            if self.drm not in config.DRM_SCHEMES:
+            if self.drm not in config_inputstreamhelper.DRM_SCHEMES:
                 raise self.InputStreamException('UnsupportedDRMScheme')
             else:
-                self.drm = config.DRM_SCHEMES[drm]
+                self.drm = config_inputstreamhelper.DRM_SCHEMES[drm]
 
     def __repr__(self):
         return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
@@ -96,7 +96,7 @@ class Helper(object):
 
     @classmethod
     def _widevine_config_path(cls):
-        return os.path.join(cls._addon_cdm_path(), config.WIDEVINE_CONFIG_NAME)
+        return os.path.join(cls._addon_cdm_path(), config_inputstreamhelper.WIDEVINE_CONFIG_NAME)
 
     @classmethod
     def _load_widevine_config(cls):
@@ -106,7 +106,7 @@ class Helper(object):
     @classmethod
     def _widevine_path(cls):
         for filename in os.listdir(cls._ia_cdm_path()):
-            if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
+            if 'widevine' in filename and filename.endswith(config_inputstreamhelper.CDM_EXTENSIONS):
                 return os.path.join(cls._ia_cdm_path(), filename)
 
         return False
@@ -135,8 +135,8 @@ class Helper(object):
             arm_version = re.search('\d+', arch.split('v')[1])
             if arm_version:
                 arch = 'armv' + arm_version.group()
-        if arch in config.ARCH_MAP:
-            return config.ARCH_MAP[arch]
+        if arch in config_inputstreamhelper.ARCH_MAP:
+            return config_inputstreamhelper.ARCH_MAP[arch]
 
         return arch
 
@@ -187,7 +187,7 @@ class Helper(object):
                 if partition_data:
                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
                         offset = int(partition_data[1].replace('s', ''))
-                        return str(offset * config.CHROMEOS_BLOCK_SIZE)
+                        return str(offset * config_inputstreamhelper.CHROMEOS_BLOCK_SIZE)
 
         self._log('Failed to calculate losetup offset.')
         return False
@@ -319,40 +319,42 @@ class Helper(object):
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
-        payload = {
-            'jsonrpc': '2.0',
-            'id': 1,
-            'method': 'Addons.GetAddonDetails',
-            'params': {
-                'addonid': self.inputstream_addon
-            }
-        }
-        data = self._json_rpc_request(payload)
-        if 'error' in data:
-            self._log('{0} is not installed.'.format(self.inputstream_addon))
-            return False
-        else:
-            self._log('{0} is installed.'.format(self.inputstream_addon))
-            return True
+        # payload = {
+        #     'jsonrpc': '2.0',
+        #     'id': 1,
+        #     'method': 'Addons.GetAddonDetails',
+        #     'params': {
+        #         'addonid': self.inputstream_addon
+        #     }
+        # }
+        # data = self._json_rpc_request(payload)
+        # if 'error' in data:
+        #     self._log('{0} is not installed.'.format(self.inputstream_addon))
+        #     return False
+        # else:
+        #     self._log('{0} is installed.'.format(self.inputstream_addon))
+        #     return True
+        return True
 
     def _inputstream_enabled(self):
         """Returns whether selected InputStream add-on is enabled.."""
-        payload = {
-            'jsonrpc': '2.0',
-            'id': 1,
-            'method': 'Addons.GetAddonDetails',
-            'params': {
-                'addonid': self.inputstream_addon,
-                'properties': ['enabled']
-            }
-        }
-        data = self._json_rpc_request(payload)
-        if data['result']['addon']['enabled']:
-            self._log('{0} {1} is enabled.'.format(self.inputstream_addon, self._inputstream_version()))
-            return True
-        else:
-            self._log('{0} is disabled.'.format(self.inputstream_addon))
-            return False
+        # payload = {
+        #     'jsonrpc': '2.0',
+        #     'id': 1,
+        #     'method': 'Addons.GetAddonDetails',
+        #     'params': {
+        #         'addonid': self.inputstream_addon,
+        #         'properties': ['enabled']
+        #     }
+        # }
+        # data = self._json_rpc_request(payload)
+        # if data['result']['addon']['enabled']:
+        #     self._log('{0} {1} is enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+        #     return True
+        # else:
+        #     self._log('{0} is disabled.'.format(self.inputstream_addon))
+        #     return False
+        return True
 
     def _enable_inputstream(self):
         """Enables selected InputStream add-on."""
@@ -374,17 +376,17 @@ class Helper(object):
     def _supports_widevine(self):
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         dialog = xbmcgui.Dialog()
-        if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
+        if self._arch() not in config_inputstreamhelper.WIDEVINE_SUPPORTED_ARCHS:
             self._log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
             dialog.ok(LANGUAGE(30004), LANGUAGE(30007))
             return False
-        if self._os() not in config.WIDEVINE_SUPPORTED_OS:
+        if self._os() not in config_inputstreamhelper.WIDEVINE_SUPPORTED_OS:
             self._log('Unsupported Widevine OS found: {0}'.format(self._os()))
             dialog.ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os()))
             return False
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]) > LooseVersion(self._kodi_version()):
+        if LooseVersion(config_inputstreamhelper.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]))
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30010).format(config_inputstreamhelper.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]))
             return False
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
             self._log('Unsupported UWP Kodi version detected.')
@@ -396,26 +398,26 @@ class Helper(object):
     def _latest_widevine_version(self, eula=False):
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
-            self._url = config.WIDEVINE_CURRENT_VERSION_URL
+            self._url = config_inputstreamhelper.WIDEVINE_CURRENT_VERSION_URL
             return self._http_request()
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             if self._legacy():
-                return config.WIDEVINE_LEGACY_VERSION
+                return config_inputstreamhelper.WIDEVINE_LEGACY_VERSION
             else:
-                self._url = config.WIDEVINE_CURRENT_VERSION_URL
+                self._url = config_inputstreamhelper.WIDEVINE_CURRENT_VERSION_URL
                 return self._http_request()
         else:
-            return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
+            return [x for x in self._chromeos_config() if config_inputstreamhelper.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
 
     def _chromeos_config(self):
         """Parses the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
         if self._legacy():
-            self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
+            self._url = config_inputstreamhelper.CHROMEOS_RECOVERY_URL_LEGACY
         else:
-            self._url = config.CHROMEOS_RECOVERY_URL
+            self._url = config_inputstreamhelper.CHROMEOS_RECOVERY_URL
         conf = [x for x in self._http_request().split('\n\n') if 'hwidmatch=' in x]
         for device in conf:
             device_dict = {}
@@ -435,9 +437,9 @@ class Helper(object):
         cdm_version = self._latest_widevine_version()
         if self._legacy():  # google has a different naming scheme on older widevine versions
             cdm_version = cdm_version.split('.')[-1]
-        cdm_os = config.WIDEVINE_OS_MAP[self._os()]
-        cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
-        self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
+        cdm_os = config_inputstreamhelper.WIDEVINE_OS_MAP[self._os()]
+        cdm_arch = config_inputstreamhelper.WIDEVINE_ARCH_MAP_X86[self._arch()]
+        self._url = config_inputstreamhelper.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
         downloaded = self._http_request(download=True)
         if downloaded:
@@ -454,7 +456,7 @@ class Helper(object):
             if self._has_widevine():
                 if os.path.lexists(self._widevine_config_path()):
                     os.remove(self._widevine_config_path())
-                os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
+                os.rename(os.path.join(self._addon_cdm_path(), config_inputstreamhelper.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
                     dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
@@ -470,7 +472,7 @@ class Helper(object):
         """Installs Widevine CDM on ARM-based architectures."""
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         cos_config = self._chromeos_config()
-        device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
+        device = [x for x in cos_config if config_inputstreamhelper.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001),
@@ -548,7 +550,7 @@ class Helper(object):
         last_update = ADDON.getSetting('last_update')
         if last_update:
             last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
-            if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
+            if last_update_dt + timedelta(days=config_inputstreamhelper.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
                 self._log('Widevine update check was made on {0}'.format(last_update_dt.isoformat()))
                 return
 
@@ -559,7 +561,7 @@ class Helper(object):
             current_version = wv_config['version']
         else:
             component = 'Chrome OS'
-            current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
+            current_version = [x for x in wv_config if config_inputstreamhelper.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
         self._log('Latest {0} version is {1}'.format(component, latest_version))
         self._log('Current {0} version installed is {1}'.format(component, current_version))
 
@@ -575,17 +577,17 @@ class Helper(object):
 
     def _widevine_eula(self):
         """Displays the Widevine EULA and prompts user to accept it."""
-        if os.path.exists(os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
-            license_file = os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)
+        if os.path.exists(os.path.join(self._addon_cdm_path(), config_inputstreamhelper.WIDEVINE_LICENSE_FILE)):
+            license_file = os.path.join(self._addon_cdm_path(), config_inputstreamhelper.WIDEVINE_LICENSE_FILE)
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
             self._log('Acquiring Widevine EULA from x86 files.')
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(eula=True), 'mac', 'x64')
+            self._url = config_inputstreamhelper.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(eula=True), 'mac', 'x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
                 with zipfile.ZipFile(self._download_path) as z:
-                    with z.open(config.WIDEVINE_LICENSE_FILE) as f:
+                    with z.open(config_inputstreamhelper.WIDEVINE_LICENSE_FILE) as f:
                         eula = f.read().strip().replace('\n', ' ')
             else:
                 return False
@@ -656,7 +658,7 @@ class Helper(object):
 
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
-            if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
+            if config_inputstreamhelper.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
                 self._log('Widevine/system arch mismatch. Reinstall is required.')
                 dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
                 return self._install_widevine()
@@ -670,7 +672,7 @@ class Helper(object):
     def _install_cdm(self):
         """Loops through local cdm folder and symlinks/copies binaries to inputstream cdm_path."""
         for cdm_file in os.listdir(self._addon_cdm_path()):
-            if cdm_file.endswith(config.CDM_EXTENSIONS):
+            if cdm_file.endswith(config_inputstreamhelper.CDM_EXTENSIONS):
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
                 cdm_path_addon = os.path.join(self._addon_cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
@@ -719,11 +721,12 @@ class Helper(object):
 
     def _supports_hls(self):
         """Return if HLS support is available in inputstream.adaptive."""
-        if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
-            return True
-        else:
-            self._log('HLS is unsupported on {0} version {1}'.format(self.inputstream_addon, self._inputstream_version()))
-            return False
+        # if LooseVersion(self._inputstream_version()) >= LooseVersion(config_inputstreamhelper.HLS_MINIMUM_IA_VERSION):
+        #     return True
+        # else:
+        #     self._log('HLS is unsupported on {0} version {1}'.format(self.inputstream_addon, self._inputstream_version()))
+        #     return False
+        return True
 
     def _check_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
@@ -744,20 +747,20 @@ class Helper(object):
 
     def check_inputstream(self):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
-        dialog = xbmcgui.Dialog()
-        if not self._has_inputstream():
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
-            return False
-        elif not self._inputstream_enabled():
-            ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
-            if ok:
-                self._enable_inputstream()
-            else:
-                return False
-        self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
-        if self.protocol == 'hls' and not self._supports_hls():
-            dialog.ok(LANGUAGE(30004),
-                      LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
-            return False
+        # dialog = xbmcgui.Dialog()
+        # if not self._has_inputstream():
+        #     dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
+        #     return False
+        # elif not self._inputstream_enabled():
+        #     ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
+        #     if ok:
+        #         self._enable_inputstream()
+        #     else:
+        #         return False
+        # self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+        # if self.protocol == 'hls' and not self._supports_hls():
+        #     dialog.ok(LANGUAGE(30004),
+        #               LANGUAGE(30017).format(self.inputstream_addon, config_inputstreamhelper.HLS_MINIMUM_IA_VERSION))
+        #     return False
 
         return self._check_drm()

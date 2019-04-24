@@ -3,13 +3,13 @@
     "_comment": "Test",
 
     "addon_path": "../plugin.video.catchuptvandmore",
-    "entry_point": "1-2-11-1",
+    "entry_point": "1-1-13",
     "exit_after_x_errors": 1,
     "disable_video_player": true,
     "kodi_version": "LEIA",
     "print_all_explored_items": true,
     "disable_image_check": true,
-    "autoreload_addon": false,
+    "autoreload_addon": true,
 
     "disable_kodi_log": false,
     "kodi_log_level": 0,
@@ -22,6 +22,5 @@
     "max_items_to_explore": -1,
     "exploration_strategy": "FIRST",
     "max_depth": -1,
-    "skip_playable_items": true,
-    "timeout": 5
+    "skip_playable_items": true
 }

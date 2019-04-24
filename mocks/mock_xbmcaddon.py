@@ -79,6 +79,8 @@ class FakeAddon(object):
             result = self._icon
         elif info_id == 'profile':
             result = Config.get('userdata_path')
+        elif info_id == 'version':
+            result = "9.9.9"
         else:
             raise Exception(
                 'Need to complete getAddonInfo mock for info_id: {}'.format(info_id))
