@@ -22,5 +22,6 @@
     "max_items_to_explore": -1,
     "exploration_strategy": "FIRST",
     "max_depth": -1,
-    "skip_playable_items": true
+    "skip_playable_items": true,
+    "timeout": 5
 }

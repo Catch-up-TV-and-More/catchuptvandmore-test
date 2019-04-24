@@ -90,6 +90,7 @@ class Config(metaclass=ConfigMC):
         auto_exploration_group.add_argument('--max-depth', type=int, default=-1, help='Set the max depth to explore from the entry point')
         auto_exploration_group.add_argument('--exclude-paths', default='', help='List of paths exclude from the exploration(e.g. \'1-3, 1-2-1\')')
         auto_exploration_group.add_argument('--skip-playable-items', action='store_true', help='Do not add playable items to the exploration stack')
+        auto_exploration_group.add_argument('--timeout', type=int, default=-1, help='Auto exploration timeout [-1]')
 
         cls._config = vars(parser.parse_args())
 

@@ -8,6 +8,7 @@ from importlib import reload
 import time
 from random import randint
 import signal
+from multiprocessing import Process
 
 # User modules imports
 from config import Config
@@ -46,7 +47,7 @@ def modules_import():
 
 def exploration_loop():
     import addon
-
+    start_time = time.time()
     entry_point_reached = False
 
     # Init Route to root
@@ -159,6 +160,11 @@ def exploration_loop():
                         pass
                     print('')
 
+            # Check for timeout
+            delta_time = time.time() - start_time
+            if Config.get('timeout') != -1 and delta_time >= Config.get('timeout'):
+                print('AUTO EXPLORATION TIMEOUT --> Exit exploration')
+                next_item = -1
 
             # Else if the user wants to exit the simulator, let's break the loop
             if next_item == -1:
@@ -171,7 +177,6 @@ def exploration_loop():
                 # If there is no item for this value, reload the same menu to prevent error
                 if next_item > len(Directory.current_directory.items) or (next_item == 0 and len(current_route.path) <= 1):
                     next_item = -2
-
 
             # If next_item has the default value just reload the same menu
             if next_item == -2:
@@ -187,24 +192,6 @@ def exploration_loop():
                 selected_item = Directory.current_directory.items[next_item]
                 Route.add_item_to_explore(selected_item)
 
-
-class Timeout():
-    """Timeout class using ALARM signal."""
-    class Timeout(Exception):
-        pass
-
-    def __init__(self, sec):
-        self.sec = sec
-
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.raise_timeout)
-        signal.alarm(self.sec)
-
-    def __exit__(self, *args):
-        signal.alarm(0)    # disable alarm
-
-    def raise_timeout(self, *args):
-        raise Timeout.Timeout()
 
 
 def main():
