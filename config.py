@@ -6,6 +6,7 @@ import json
 import os
 from xml.etree import ElementTree as ET
 import polib
+import random
 
 CWD_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -166,7 +167,25 @@ class Config(metaclass=ConfigMC):
 
         # Parse settings.xml files
         addon_settings_filepath = os.path.join(Config.get('addon_path'), "resources", "settings.xml")
+        
+        # Choose a random languauge
         cls._config['addon_settings'] = parse_settings_xml(addon_settings_filepath)
+        cls._config['addon_settings']["arte.language"] = random.choice(["FR", "DE", "EN", "ES", "PL", "IT"])
+        cls._config['addon_settings']["euronews.language"] = random.choice(["FR", "EN", "AR", "DE", "IT", "ES", "PT", "RU", "TR", "FA", "GR", "HU"])
+        cls._config['addon_settings']["france24.language"] = random.choice(["FR", "EN", "AR", "ES"])
+        cls._config['addon_settings']["mtv.language"] = random.choice(["FR"])
+        cls._config['addon_settings']["dw.language"] = random.choice(["EN", "DE", "ES", "AR"])
+        cls._config['addon_settings']["beinsports.language"] = random.choice(["AU", "AR", "EN", "FR", "US", "ES", "NZ", "HK", "PH", "TH", "ID", "MY"])
+        cls._config['addon_settings']["qvc.language"] = random.choice(["JP", "DE", "IT", "UK", "US"])
+        cls._config['addon_settings']["nhkworld.language"] = random.choice(["Outside Japan", "In Japan"])
+        cls._config['addon_settings']["cgtn.language"] = random.choice(["FR", "EN", "AR", "ES", "RU"])
+        cls._config['addon_settings']["paramountchannel.language"] = random.choice(["ES", "IT"])
+        cls._config['addon_settings']["rt.language"] = random.choice(["FR", "EN", "AR", "ES"])
+        cls._config['addon_settings']["france3regions.language"] = random.choice(["Alpes", "Alsace", "Aquitaine", "Auvergne", "Bourgogne", "Bretagne", "Centre-Val de Loire", "Chapagne-Ardenne", "Corse", "Côte d'Azur", "Franche-Compté", "Languedoc-Roussillon", "Limousin", "Lorraine", "Midi-Pyrénées", "Nord-Pas-de-Calais", "Basse-Normandie", "Haute-Normandie", "Paris Île-de-France", "Pays de la Loire", "Picardie", "Poitou-Charentes", "Provence-Alpes", "Rhône-Alpes"])
+        cls._config['addon_settings']["la_1ere.language"] = random.choice(["Guadeloupe", "Guyane", "Martinique", "Mayotte", "Nouvelle Calédonie", "Polynésie", "Réunion", "St-Pierre et Miquelon", "Wallis et Futuna", "Outre-mer"])
+        cls._config['addon_settings']["realmadridtv.language"] = random.choice(["ES", "EN"])
+        cls._config['addon_settings']["tvp3.language"] = random.choice(["Białystok", "Bydgoszcz", "Gdańsk", "Gorzów Wielkopolski", "Katowice", "Kielce", "Kraków", "Lublin", "Łódź", "Olsztyn", "Opole", "Poznań", "Rzeszów", "Szczecin", "Warszawa", "Wrocław"])
+
 
         cls._config['codequick_fake_settings'] = {}
 
