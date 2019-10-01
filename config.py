@@ -112,7 +112,7 @@ class Config(metaclass=ConfigMC):
 
         # We get the full path of the addon path
         if cls._config['addon_path'] == '':
-            raise Exception('You need to specify the path of plugin.video.catchuptvandmore')
+            raise Exception('You need to specify the path of plugin.video.catchuptvandmore (see --help)')
         cls._config['addon_path'] = os.path.abspath(cls._config['addon_path'])
 
 
