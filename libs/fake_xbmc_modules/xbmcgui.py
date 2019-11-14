@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 
 class Window(object):
     def __init__(self, existingWindowId=-1):
@@ -139,3 +140,50 @@ class DialogProgress(object):
     
     def iscanceled(self):
         return True
+
+
+# INT_MAX = sys.maxint
+INT_MAX = 9223372036854775807
+
+
+class WindowXML(Window):
+    def __init__(self, xmlFilename, scriptPath, defaultSkin="Default", defaultRes="720p", isMedia=False):
+        pass
+    
+    def addItem(self, item, position=INT_MAX):
+        pass
+    
+    def addItems(self, items):
+        pass
+    
+    def removeItem(self, position):
+        pass
+    
+    def getCurrentListPosition(self):
+        return 0
+    
+    def setCurrentListPosition(self, position):
+        pass
+    
+    def getListItem(self, position):
+        return ListItem()
+    
+    def getListSize(self):
+        return 0
+    
+    def clearList(self):
+        pass
+    
+    def setContainerProperty(self, strProperty, strValue):
+        pass
+    
+    def setContent(self, strValue):
+        pass
+    
+    def getCurrentContainerId(self):
+        return 0
+    
+
+class WindowXMLDialog(WindowXML):
+    def __init__(self, xmlFilename, scriptPath, defaultSkin="Default", defaultRes="720p"):
+        pass

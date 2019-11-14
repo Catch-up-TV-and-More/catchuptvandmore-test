@@ -28,6 +28,9 @@ def customize_sys_path():
     # Add kodi-six module to python path
     sys.path.insert(1, Config.get('kodi-six_path'))
 
+    # Add pyqrcode module to python path
+    sys.path.insert(1, Config.get('pyqrcode_path'))
+
     # Add codequick module to python path
     sys.path.append(Config.get('codequick_path'))
 

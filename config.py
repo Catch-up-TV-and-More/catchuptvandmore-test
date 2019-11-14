@@ -140,6 +140,8 @@ class Config(metaclass=ConfigMC):
         cls._config['youtubedl_en_strings_po_filepath'] = os.path.join(cls._config['youtubedl_addon_path'], "resources", "language", "English", "strings.po")
 
         cls._config['kodi-six_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.kodi-six', 'libs')
+        cls._config['pyqrcode_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.pyqrcode', 'lib')
+
 
         cls._config['fake_xbmc_modules_path'] = os.path.join(CWD_PATH, 'libs', 'fake_xbmc_modules')
 
