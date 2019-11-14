@@ -11,8 +11,7 @@
     "disable_image_check": true,
     "autoreload_addon": false,
 
-    "disable_kodi_log": false,
-    "kodi_log_level": 0,
+    "kodi_log_level": "debug",
     "disable_xbmcaddon_mock_log": true,
     "disable_xbmc_mock_log": true,
 

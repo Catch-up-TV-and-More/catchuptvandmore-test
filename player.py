@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import subprocess
+import shutil
+import sys
+from custom_logger import CustomLogger
+
+log = CustomLogger(__name__)
 
 
 class Player:
     def __init__(self, url):
         self.url = url
+        # Check for mpv
+        if shutil.which('mpv') is None:
+            log.error('Could not found mpv program on your system')
+            sys.exit(1)
 
     def play(self):
         #  We start mpv with the video

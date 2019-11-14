@@ -75,9 +75,8 @@ class Config(metaclass=ConfigMC):
 
 
         log_group = parser.add_argument_group('Logging')
-        log_group.add_argument('-l', '--log-level', default='INFO', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], help='Simulator log level')
-        log_group.add_argument('--disable-kodi-log', action='store_true', help='Disable stdout Kodi logging')
-        log_group.add_argument('--kodi-log-level', type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6, 7], help='Minimum Kodi log level to be logging')        
+        log_group.add_argument('-l', '--log-level', default='info', choices=['debug', 'info', 'warning', 'error', 'critical'], help='Simulator log level')
+        log_group.add_argument('--kodi-log-level', default='debug', choices=['debug', 'info', 'notice', 'warning', 'error', 'severe', 'fatal', 'none'], help='Kodi log level')
         log_group.add_argument('--disable-xbmcaddon-mock-log', action='store_true', help='Disable log messages of xbmcaddon module functions calls')
         log_group.add_argument('--disable-xbmcplugin-mock-log', action='store_true', help='Disable log messages of xbmcplugin module functions calls')
         log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')

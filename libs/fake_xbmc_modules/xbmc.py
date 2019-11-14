@@ -10,18 +10,41 @@ if Config.get('disable_xbmc_mock_log'):
     log_.set_log_level('ERROR')
 
 LOGDEBUG = 0
-LOGERROR = 4
-LOGFATAL = 6
 LOGINFO = 1
-LOGNONE = 7
 LOGNOTICE = 2
-LOGSEVERE = 5
 LOGWARNING = 3
+LOGERROR = 4
+LOGSEVERE = 5
+LOGFATAL = 6
+LOGNONE = 7
+
+
+levelno_dict = {
+    0: 'debug',
+    1: 'info',
+    2: 'notice',
+    3: 'warning',
+    4: 'error',
+    5: 'severe',
+    6: 'fatal',
+    7: 'none'
+}
+
+levelstr_dict = {
+    'debug': 0,
+    'info': 1,
+    'notice': 2,
+    'warning': 3,
+    'error': 4,
+    'severe': 5,
+    'fatal': 6,
+    'none': 6
+}
 
 
 def log(msg, level=LOGDEBUG):
-    if level >= Config.get('kodi_log_level'):
-        log_.info('[level {}] {}'.format(level, msg))
+    if level >= levelstr_dict.get(Config.get('kodi_log_level'), 0):
+        log_.info('[{} level] {}'.format(levelno_dict.get(level, 'unknown'), msg))
     RuntimeErrorCQ.last_error_message += msg
     pass
 
