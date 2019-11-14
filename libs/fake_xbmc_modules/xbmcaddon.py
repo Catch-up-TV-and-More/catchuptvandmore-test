@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-import sys
-import mock
-
-
 from config import Config
+from custom_logger import CustomLogger
 
+log = CustomLogger(__name__)
+
+if Config.get('disable_xbmcaddon_mock_log'):
+    log.set_log_level('ERROR')
 
 
 ADDONS_SETTINGS = {
@@ -55,7 +55,7 @@ ADDONS_ICONS = {
 }
 
 
-class FakeAddon(object):
+class Addon(object):
     def __init__(self, id='plugin.video.catchuptvandmore'):
         self._id = id
         self._settings = ADDONS_SETTINGS[self._id]
@@ -85,34 +85,22 @@ class FakeAddon(object):
             raise Exception(
                 'Need to complete getAddonInfo mock for info_id: {}'.format(info_id))
 
-        if not Config.get('disable_xbmcaddon_mock_log'):
-            print('[FakeAddon] getAddonInfo of "{}" --> "{}"'.format(info_id, result))
+        log.debug('getAddonInfo of "{}" --> "{}"'.format(info_id, result))
         return result
 
     def getSetting(self, setting_id):
         if setting_id not in self._settings:
-            print('[FakeAddon] Missing setting_id "{}" in {} settings (config.py)'.format(setting_id, self._id))
+            log.error('Missing setting_id "{}" in {} settings (config.py)'.format(setting_id, self._id))
             exit(-1)
-        if not Config.get('disable_xbmcaddon_mock_log'):
-            print('[FakeAddon] getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
+        log.debug('getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
         return self._settings.get(setting_id, '')
 
     def setSetting(self, _id, value):
-        if not Config.get('disable_xbmcaddon_mock_log'):
-            print('[FakeAddon] setSetting of "{}" --> "{}"'.format(_id, value))
+        log.debug('setSetting of "{}" --> "{}"'.format(_id, value))
         self._settings[_id] = value
 
     def getLocalizedString(self, _id):
-        if not Config.get('disable_xbmcaddon_mock_log'):
-            print('[FakeAddon] getLocalizedString of "{}" --> "{}"'.format(_id, self._labels.get(_id)))
+        log.debug('getLocalizedString of "{}" --> "{}"'.format(_id, self._labels.get(_id)))
         if _id not in self._labels:
-            print('[FakeAddon] getLocalizedString of "{}" --> "{}" error (missing key in strings.po?)'.format(_id, self._labels.get(_id)))
+            log.error('getLocalizedString of "{}" --> "{}" error (missing key in strings.po?)'.format(_id, self._labels.get(_id)))
         return self._labels.get(_id, str(_id))
-
-
-mock_xbmcaddon = mock.MagicMock()
-
-mock_xbmcaddon.Addon.side_effect = FakeAddon
-
-# Say to Python that the xbmcaddon module is mock_xbmcaddon
-sys.modules['xbmcaddon'] = mock_xbmcaddon

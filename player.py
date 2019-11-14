@@ -2,6 +2,7 @@
 
 import subprocess
 
+
 class Player:
     def __init__(self, url):
         self.url = url
@@ -11,7 +12,7 @@ class Player:
         p = subprocess.Popen(['mpv', self.url], shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         (output, err) = p.communicate()
         retval = p.wait()
-        print('MPV_STDOUT: \n' + output.decode('utf-8'))
+        # print('MPV_STDOUT: \n' + output.decode('utf-8'))
 
 
 

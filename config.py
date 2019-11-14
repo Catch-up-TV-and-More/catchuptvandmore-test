@@ -75,8 +75,9 @@ class Config(metaclass=ConfigMC):
 
 
         log_group = parser.add_argument_group('Logging')
+        log_group.add_argument('-l', '--log-level', default='INFO', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'], help='Simulator log level')
         log_group.add_argument('--disable-kodi-log', action='store_true', help='Disable stdout Kodi logging')
-        log_group.add_argument('--kodi-log-level', type=int, default=0, help='Minimum Kodi log level to be logging')
+        log_group.add_argument('--kodi-log-level', type=int, default=0, choices=[0, 1, 2, 3, 4, 5, 6, 7], help='Minimum Kodi log level to be logging')        
         log_group.add_argument('--disable-xbmcaddon-mock-log', action='store_true', help='Disable log messages of xbmcaddon module functions calls')
         log_group.add_argument('--disable-xbmcplugin-mock-log', action='store_true', help='Disable log messages of xbmcplugin module functions calls')
         log_group.add_argument('--disable-xbmc-mock-log', action='store_true', help='Disable log messages of xbmc module functions calls')
@@ -139,6 +140,11 @@ class Config(metaclass=ConfigMC):
         cls._config['youtubedl_icon_filepath'] = os.path.join(cls._config['youtubedl_addon_path'], 'icon.png')
         cls._config['youtubedl_en_strings_po_filepath'] = os.path.join(cls._config['youtubedl_addon_path'], "resources", "language", "English", "strings.po")
 
+        cls._config['kodi-six_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.kodi-six', 'libs')
+
+        cls._config['fake_xbmc_modules_path'] = os.path.join(CWD_PATH, 'libs', 'fake_xbmc_modules')
+
+
         # Fake Kodi/userdata/addon_data/plugin.video.catchuptvandmore
         cls._config['userdata_path'] = os.path.join(CWD_PATH, 'fake_userdata')
 
@@ -200,11 +206,7 @@ class Config(metaclass=ConfigMC):
         cls._config['codequick_labels'] = parse_strings_po(Config.get('codequick_en_strings_po_filepath'))
         cls._config['inputstreamhelper_labels'] = parse_strings_po(Config.get('inputstreamhelper_en_strings_po_filepath'))
         cls._config['youtubedl_labels'] = parse_strings_po(Config.get('youtubedl_en_strings_po_filepath'))
-        cls._config['xbmc_labels'] = parse_strings_po(os.path.join(CWD_PATH, "mocks", "strings.po"))
-
-
-
-
+        cls._config['xbmc_labels'] = parse_strings_po(os.path.join(CWD_PATH, 'libs', 'fake_xbmc_modules', "strings.po"))
 
 
 

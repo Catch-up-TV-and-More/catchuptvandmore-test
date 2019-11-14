@@ -2,6 +2,9 @@
 
 from config import Config
 from random import randint
+from custom_logger import CustomLogger
+
+log = CustomLogger(__name__)
 
 
 class AutoExploration:
@@ -17,18 +20,18 @@ class AutoExploration:
 
         # If current_path alredy in items_to_explore, nothing to do
         if str(current_path) in cls.items_to_explore:
-            print('[DEBUG] Menu already seen, do not add its items in stack to explore')
+            log.info('Menu already seen, do not add its items in stack to explore')
             return
 
         # Is max depth reached nothing to do
         if len(current_path) >= Config.get('max_depth') and \
                 Config.get('max_depth') != -1:
-            print('[DEBUG] Max depth reached, do not add menu items in stack to explore')
+            log.info('Max depth reached, do not add menu items in stack to explore')
             return
 
         # If we are in update_listing mode, do not explore deeper
         if current_directory.update_listing:
-            print('[DEBUG] (TEMPO?) update_listing is True, do not explore deeper')
+            log.info('(TEMPO?) update_listing is True, do not explore deeper')
             return
 
 
@@ -58,11 +61,11 @@ class AutoExploration:
             candidate_path = list(current_path)
             candidate_path.append(i)
             if candidate_path in Config.get('exclude_paths'):
-                print('[DEBUG] Do not add item {} to explore stack because it is in exclude list'.format(i))
+                log.info('Do not add item {} to explore stack because it is in exclude list'.format(i))
             elif Config.get('skip_playable_items') and current_directory.items[i].is_folder is False:
-                print('[DEBUG] Do not add item {} to explore stack because it is a playable item'.format(i))
+                log.info('Do not add item {} to explore stack because it is a playable item'.format(i))
             else:
-                print('[DEBUG] Add item {} to explore stack'.format(i))
+                log.info('Add item {} to explore stack'.format(i))
                 items_key.append(i)
 
         cls.items_to_explore[str(current_path)] = items_key
@@ -74,7 +77,7 @@ class AutoExploration:
         # If max items to explore reached
         if cls.explored_items_cnt >= Config.get('max_items_to_explore') and \
                 Config.get('max_items_to_explore') != -1:
-            print('[DEBUG] Max items number to explore reached --> next_item: -1')
+            log.info('Max items number to explore reached --> next_item: -1')
             return -1
 
         # If we are at the entry point
@@ -91,12 +94,12 @@ class AutoExploration:
         # Is max depth reached, go back
         if len(current_path) >= Config.get('max_depth') and \
                 Config.get('max_depth') != -1:
-            print('[DEBUG] Max depth reached --> next_item: 0')
+            log.info('Max depth reached --> next_item: 0')
             return 0
 
         # If we are in update_listing mode, go back
         if current_directory.update_listing:
-            print('[DEBUG] (TEMPO?) update_listing is True --> next_item: 0')
+            log.info('(TEMPO?) update_listing is True --> next_item: 0')
             return 0
 
 
@@ -104,11 +107,11 @@ class AutoExploration:
         if str(current_path) in cls.items_to_explore and \
                 cls.items_to_explore[str(current_path)] == []:
 
-            print('[DEBUG] All items of this menu was expored --> next_item: 0')
+            log.info('All items of this menu was expored --> next_item: 0')
             return 0
 
         item_to_explore = cls.items_to_explore[str(current_path)][-1]
         cls.items_to_explore[str(current_path)].pop()
-        print('[DEBUG] Not all items of this menu was explored --> next_item: {}'.format(item_to_explore))
+        log.info('Not all items of this menu was explored --> next_item: {}'.format(item_to_explore))
         cls.explored_items_cnt += 1
         return item_to_explore

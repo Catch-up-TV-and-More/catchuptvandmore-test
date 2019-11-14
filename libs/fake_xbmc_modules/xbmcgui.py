@@ -1,16 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# The unicode_literals import only has
-# an effect on Python 2.
-# It makes string literals as unicode like in Python 3
-from __future__ import unicode_literals
 
-
-import sys
-import mock
-
-
-class FakeWindow(object):
+class Window(object):
     def __init__(self, existingWindowId=-1):
         # type: (int) -> None
         self.dict = {}
@@ -26,7 +17,7 @@ class FakeWindow(object):
         pass
 
 
-class FakeListItem(object):
+class ListItem(object):
     def __init__(self, label="", label2="", iconImage="", thumbnailImage="", path=""):
         self._label = label
         self._label2 = label2
@@ -86,9 +77,65 @@ class FakeListItem(object):
         pass
 
 
-mock_xbmcgui = mock.MagicMock()
-mock_xbmcgui.ListItem.side_effect = FakeListItem
-mock_xbmcgui.Window.side_effect = FakeWindow
+class Dialog(object):
+    
+    def __init__(self):
+        # type: () -> None
+        pass
+    
+    def yesno(self, heading, line1, line2="", line3="", nolabel="", yeslabel="", autoclose=0):
+        return True
+    
+    def info(self, item):
+        return True
+    
+    def select(self, heading, list, autoclose=0, preselect=-1, useDetails=False):
+        return 0
+    
+    def contextmenu(self, list):
+        return 0
+    
+    def multiselect(self, heading, options, autoclose=0, preselect=None, useDetails=False):
+        return [0]
+    
+    def ok(self, heading, line1, line2="", line3=""):
+        return True
+    
+    def textviewer(self, heading, text, usemono=False):
+        pass
+    
+    def browse(self, type, heading, shares, mask="", useThumbs=False, treatAsFolder=False, defaultt="", enableMultiple=False):
+        return ""
+    
+    def browseSingle(self, type, heading, shares, mask="", useThumbs=False, treatAsFolder=False, defaultt=""):
+        return ""
+    
+    def browseMultiple(self, type, heading, shares, mask="", useThumbs=False, treatAsFolder=False, defaultt=""):
+        return [""]
+    
+    def numeric(self, type, heading, defaultt=""):
+        return ""
+    
+    def notification(self, heading, message, icon="", time=0, sound=True):
+        pass
+    
+    def input(self, heading, defaultt="", type=0, option=0, autoclose=0):
+        return ""
 
-# Say to Python that the xbmcgui module is mock_xbmcgui
-sys.modules['xbmcgui'] = mock_xbmcgui
+
+class DialogProgress(object):
+    
+    def __init__(self):
+        pass
+    
+    def create(self, heading, line1="", line2="", line3=""):
+        pass
+    
+    def update(self, percent, line1="", line2="", line3=""):
+        pass
+    
+    def close(self):
+        pass
+    
+    def iscanceled(self):
+        return True
