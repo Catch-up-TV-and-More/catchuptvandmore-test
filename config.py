@@ -65,6 +65,7 @@ class Config(metaclass=ConfigMC):
         parser.add_argument('-a', '--addon-path', default='', help='Path of plugin.video.catchuptvandmore')
         parser.add_argument('-c', '--config-file', default='', help='Optional JSON config file (if given, CLI args are not taken !!)')
         parser.add_argument('-s', '--console-size', type=int, default=160, help='Your console size in order to compute the width of the fake Kodi menu [160]')
+        parser.add_argument('--test-modules', action='store_true', help='Try to load each Python files to detect errors')
         parser.add_argument('--entry-point', default='1', help='Entry point of the simulation (separate items with dashes (e.g. \'1-2-1-13\')) [1]')
         parser.add_argument('--exit-after-x-errors', type=int, default=-1, help='Exit simulator after N errors encountered [-1]')
         parser.add_argument('--disable-video-player', action='store_true', help='Do not open mpv on video selection')
@@ -141,6 +142,7 @@ class Config(metaclass=ConfigMC):
 
         cls._config['kodi-six_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.kodi-six', 'libs')
         cls._config['pyqrcode_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.pyqrcode', 'lib')
+        cls._config['tzlocal_path'] = os.path.join(CWD_PATH, 'libs', 'script.module.tzlocal', 'lib')
 
 
         cls._config['fake_xbmc_modules_path'] = os.path.join(CWD_PATH, 'libs', 'fake_xbmc_modules')

@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # Python modules imports
+import os
+import glob
 import sys
 import mock
-from importlib import reload
+from importlib import reload, import_module
 import time
 from random import randint
 
@@ -31,6 +33,9 @@ def customize_sys_path():
     # Add pyqrcode module to python path
     sys.path.insert(1, Config.get('pyqrcode_path'))
 
+    # Add tzlocal module to python path
+    sys.path.insert(1, Config.get('tzlocal_path'))
+
     # Add codequick module to python path
     sys.path.append(Config.get('codequick_path'))
 
@@ -41,6 +46,37 @@ def customize_sys_path():
     sys.path.insert(1, Config.get('addon_path'))
 
     # print(sys.path)
+
+
+def test_modules(log):
+    log.info('Try to load each Python files of the addons to detect errors')
+    modules_to_test = []
+    addon_full_path = os.path.dirname(os.path.abspath(Config.get('addon_path')))
+    for root, dirs, files in os.walk(Config.get('addon_path')):
+        for file in files:
+            if file.endswith(".py"):
+                module = os.path.join(root, file)
+                module = module.replace(addon_full_path, '')
+                module = module.replace('.py', '')
+                module = module.replace('/plugin.video.catchuptvandmore/', '')
+                module = module.replace('/', '.')
+                if 'resources.tools' in module:
+                    pass
+                elif '__init__' in module:
+                    pass
+                elif 'not_to_push' in module:
+                    pass
+                else:
+                    modules_to_test.append(module)
+    for module in modules_to_test:
+        log.info("Try to load module '" + module + "'")
+        try:
+            import_module(module)
+        except Exception:
+            log.error("Failed to load module '" + module + "'")
+            return -1
+    return 0
+
 
 
 def exploration_loop(log):
@@ -217,17 +253,19 @@ def main():
     # Custumize sys.path to use custom modules
     customize_sys_path()
 
-    exploration_loop(log)
+    if Config.get('test_modules'):
+        return test_modules(log)
+    else:
+        exploration_loop(log)
 
+        if Config.get('print_all_explored_items'):
+            print('\n* All explored items:\n')
+            for s in Route.explored_routes_l:
+                print(s)
 
-    if Config.get('print_all_explored_items'):
-        print('\n* All explored items:\n')
-        for s in Route.explored_routes_l:
-            print(s)
-
-    RuntimeErrorCQ.print_encountered_warnings()
-    ret_val = RuntimeErrorCQ.print_encountered_errors()
-    return ret_val
+        RuntimeErrorCQ.print_encountered_warnings()
+        ret_val = RuntimeErrorCQ.print_encountered_errors()
+        return ret_val
 
 
 if __name__ == '__main__':
