@@ -1,6 +1,6 @@
 {
 
-    "_comment": "Try to load each Python files of the addons to detect errors",
+    "_comment": "Try to load each Python files of the addon to detect errors",
 
     "addon_path": "../plugin.video.catchuptvandmore",
     "test_modules": true

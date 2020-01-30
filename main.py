@@ -72,8 +72,9 @@ def test_modules(log):
         log.info("Try to load module '" + module + "'")
         try:
             import_module(module)
-        except Exception:
+        except Exception as e:
             log.error("Failed to load module '" + module + "'")
+            log.error("Error: {}".format(e))
             return -1
     return 0
 
