@@ -95,6 +95,13 @@ class Addon(object):
         log.debug('getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
         return self._settings.get(setting_id, '')
 
+    def getSettingBool(self, setting_id):
+        if setting_id not in self._settings:
+            log.error('Missing setting_id "{}" in {} settings (config.py)'.format(setting_id, self._id))
+            exit(-1)
+        log.debug('getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
+        return self._settings.get(bool(setting_id), '')
+
     def setSetting(self, _id, value):
         log.debug('setSetting of "{}" --> "{}"'.format(_id, value))
         self._settings[_id] = value
