@@ -2,7 +2,7 @@
 
     "_comment": "Config file to open each french replay channel and explore as deep as possible (but skip playable items)",
 
-    "addon_path": "../plugin.video.catchuptvandmore",
+    "addon_path": "../plugin.video.catchuptvandmore/plugin.video.catchuptvandmore",
     "entry_point": "1-2-1",
     "exit_after_x_errors": 5,
     "disable_video_player": true,
