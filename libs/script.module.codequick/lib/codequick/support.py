@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 # Standard Library Imports
+import importlib
 import binascii
 import inspect
 import logging
@@ -17,9 +18,6 @@ import xbmc
 
 # Package imports
 from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3, unicode_type
-
-# Hack simulator
-from runtime_error import RuntimeErrorCQ
 
 if PY3:
     from inspect import getfullargspec
@@ -38,6 +36,13 @@ logger = logging.getLogger("%s.support" % logger_id)
 
 # Listitem auto sort methods
 auto_sort = set()
+
+
+class RouteMissing(KeyError):
+    """
+    Exception class that is raisd when no
+    route is found in the registered routes.
+    """
 
 
 class LoggingMap(dict):
@@ -234,7 +239,21 @@ class Dispatcher(object):
 
     def get_route(self, path=None):  # type: (str) -> Route
         """Return the given route object."""
-        return self.registered_routes[path if path else self.selector]
+        path = path if path else self.selector
+
+        # Attempt to import the module where the route
+        # is located if it's not already registered
+        if path not in self.registered_routes:
+            module_path = "resources.lib.main" if path == "root" else ".".join(path.strip("/").split("/")[:-1])
+            logger.debug("Attempting to import route: %s", module_path)
+            try:
+                importlib.import_module(module_path)
+            except ImportError:
+                raise RouteMissing("unable to import route module: %s" % module_path)
+        try:
+            return self.registered_routes[path]
+        except KeyError:
+            raise RouteMissing(path)
 
     def register_callback(self, callback, parent):
         """
@@ -284,9 +303,6 @@ class Dispatcher(object):
         logger.debug("Dispatching to route: '%s'", self.selector)
         logger.debug("Callback parameters: '%s'", self.callback_params)
 
-        RuntimeErrorCQ.last_codequick_route = self.selector
-        RuntimeErrorCQ.last_codequick_callback_params = self.callback_params
-
         try:
             # Fetch the controling class and callback function/method
             route = self.get_route()
@@ -319,10 +335,6 @@ class Dispatcher(object):
             logger.critical(msg, exc_info=1)
             dialog = xbmcgui.Dialog()
             dialog.notification(e.__class__.__name__, msg, addon_data.getAddonInfo("icon"))
-
-            # RuntimeErrorCQ.last_error_message = msg
-            RuntimeErrorCQ.last_menu_triggered_error = True
-            
             return e
 
         else:
@@ -368,7 +380,10 @@ def build_path(callback=None, args=None, query=None, **extra_query):
     """
 
     # Set callback to current callback if not given
-    route = callback.route if callback else dispatcher.get_route()
+    if callback and hasattr(callback, "route"):
+        route = callback.route
+    else:
+        route = dispatcher.get_route(callback)
 
     # Convert args to keyword args if required
     if args:
