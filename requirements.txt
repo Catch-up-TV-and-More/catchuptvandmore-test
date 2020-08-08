@@ -1,0 +1,9 @@
+git+https://github.com/willforde/urlquick.git
+polib
+mock
+htmlement
+colorama
+requests
+youtube_dl
+pytz
+six
