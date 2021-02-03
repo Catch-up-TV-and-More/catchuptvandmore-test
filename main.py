@@ -60,7 +60,7 @@ def test_modules(log):
                 module = module.replace('.py', '')
                 module = module.replace('/plugin.video.catchuptvandmore/', '')
                 module = module.replace('/', '.')
-                if 'resources.tools' in module:
+                if 'tools' in module:
                     pass
                 elif '__init__' in module:
                     pass
@@ -77,7 +77,6 @@ def test_modules(log):
             log.error("Error: {}".format(e))
             return -1
     return 0
-
 
 
 def exploration_loop(log):
