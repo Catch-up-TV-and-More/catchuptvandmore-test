@@ -2,7 +2,7 @@
 
     "_comment": "Config file to open addon replay menu and exit",
 
-    "addon_path": "../plugin.video.catchuptvandmore/plugin.video.catchuptvandmore",
+    "addon_path": "../plugin.video.catchuptvandmore",
     "entry_point": "1-2",
     "exit_after_x_errors": 5,
     "disable_video_player": true,
