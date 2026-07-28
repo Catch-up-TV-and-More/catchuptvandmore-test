@@ -4,25 +4,22 @@ import json
 import binascii
 import xbmc
 from lib.yd_private_libs import util, servicecontrol, jsonqueue
-sys.path.insert(0, util.MODULE_PATH)
 import YDStreamExtractor  # noqa E402
 import threading  # noqa E402
+import AddonSignals
 
 
-class Service(xbmc.Monitor):
+class Service():
     def __init__(self):
         self.downloadCount = 0
         self.controller = servicecontrol.ServiceControl()
+
+        AddonSignals.registerSlot('script.module.youtube.dl', 'DOWNLOAD_STOP', self.stopDownload)
+
         self.start()
 
-    def onNotification(self, sender, method, data):
-        if not sender == 'script.module.youtube.dl':
-            return
-        self.processCommand(method.split('.', 1)[-1], self.controller.processCommandData(data))  # Remove the "Other." prefix
-
-    def processCommand(self, command, args):
-        if command == 'DOWNLOAD_STOP':
-            YDStreamExtractor._cancelDownload()
+    def stopDownload(self, args):
+        YDStreamExtractor._cancelDownload()
 
     def getNextQueuedDownload(self):
         try:
@@ -52,14 +49,17 @@ class Service(xbmc.Monitor):
     def _start(self):
         util.LOG('DOWNLOAD SERVICE: START')
         info = self.getNextQueuedDownload()
+        monitor = xbmc.Monitor()
 
-        while info and not xbmc.abortRequested:
+        while info and not monitor.abortRequested():
             t = threading.Thread(target=YDStreamExtractor._handleDownload, args=(
-                info['data'],), kwargs={'path': info['path'], 'duration': info['duration'], 'bg': True})
+                info['data'],), kwargs={'path': info['path'], 'filename': info['filename'],
+                                        'duration': info['duration'], 'bg': True})
             t.start()
 
-            while t.isAlive() and not xbmc.abortRequested:
-                xbmc.sleep(100)
+            while t.is_alive():
+                if xbmc.waitForAbort(0.1):
+                    break
 
             info = self.getNextQueuedDownload()
 

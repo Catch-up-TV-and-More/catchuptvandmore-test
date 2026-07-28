@@ -2,7 +2,7 @@
 import sys
 import time
 import datetime
-import xbmc
+from kodi_six import xbmc
 from yd_private_libs import util, updater
 import YDStreamUtils as StreamUtils
 
@@ -39,7 +39,7 @@ except ImportError:
 
 try:
     import youtube_dl
-except:
+except Exception:
     util.ERROR('Failed to import youtube-dl')
     youtube_dl = None
 
@@ -55,12 +55,18 @@ try:
     datetime.datetime.strptime('0', '%H')
 except TypeError:
     # Fix for datetime issues with XBMC/Kodi
-    class new_datetime(datetime.datetime):
-        @classmethod
-        def strptime(cls, dstring, dformat):
-            return datetime.datetime(*(time.strptime(dstring, dformat)[0:6]))
+    def redefine_datetime(orig):
+        class datetime(orig):
+            @classmethod
+            def strptime(cls, dstring, dformat):
+                return datetime(*(time.strptime(dstring, dformat)[0:6]))
 
-    datetime.datetime = new_datetime
+            def __repr__(self):
+                return 'datetime.' + orig.__repr__(self)
+
+        return datetime
+
+    datetime.datetime = redefine_datetime(datetime.datetime)
 
 # _utils_unified_strdate = youtube_dl.utils.unified_strdate
 # _utils_date_from_str = youtube_dl.utils.date_from_str
@@ -195,6 +201,7 @@ class YoutubeDLWrapper(youtube_dl.YoutubeDL):
     def __init__(self, *args, **kwargs):
         self._lastDownloadedFilePath = ''
         self._overrideParams = {}
+        self._monitor = xbmc.Monitor()
 
         youtube_dl.YoutubeDL.__init__(self, *args, **kwargs)
 
@@ -203,18 +210,18 @@ class YoutubeDLWrapper(youtube_dl.YoutubeDL):
         if _CALLBACK:
             try:
                 return _CALLBACK(msg)
-            except:
+            except Exception:
                 util.ERROR('Error in callback. Removing.')
                 _CALLBACK = None
         else:
-            if xbmc.abortRequested:
+            if self._monitor.abortRequested():
                 raise Exception('abortRequested')
             # print msg.encode('ascii','replace')
         return True
 
     def progressCallback(self, info):
         global _DOWNLOAD_CANCEL
-        if xbmc.abortRequested or _DOWNLOAD_CANCEL:
+        if self._monitor.abortRequested() or _DOWNLOAD_CANCEL:
             _DOWNLOAD_CANCEL = False
             raise DownloadCanceledException('abortRequested')
         if _DOWNLOAD_DURATION:
@@ -331,10 +338,6 @@ def _getYTDL():
 def download(info):
     from youtube_dl import downloader
     ytdl = _getYTDL()
-    name = ytdl.prepare_filename(info)
     if 'http_headers' not in info:
         info['http_headers'] = std_headers
-    fd = downloader.get_suitable_downloader(info)(ytdl, ytdl.params)
-    for ph in ytdl._progress_hooks:
-        fd.add_progress_hook(ph)
-    return fd.download(name, info)
+    return ytdl.process_info(info)

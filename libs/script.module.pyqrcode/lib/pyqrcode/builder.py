@@ -9,7 +9,7 @@
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of the copyright holder nor the names of its
+#     * Neither the name of the copyright holder nor the names of its 
 #       contributors may be used to endorse or promote products derived from
 #       this software without specific prior written permission
 #
@@ -27,12 +27,13 @@
 builds the code. While the various output methods draw the code into a file.
 """
 
-#Imports required for 2.7 support
+#Imports required for 2.x support
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-from . import tables as tables
+import pyqrcode.tables as tables
 import io
 import itertools
+import math
 
 class QRCodeBuilder:
     """This class generates a QR code based on the standard. It is meant to
@@ -50,8 +51,9 @@ class QRCodeBuilder:
     Test codes were tested against:
         http://zxing.org/w/decode.jspx
 
-    Also, reference codes were generated at:
+    Also, reference codes were generat/ed at:
         http://www.morovia.com/free-online-barcode-generator/qrcode-maker.php
+        http://demos.telerik.com/aspnet-ajax/barcode/examples/qrcode/defaultcs.aspx
 
     QR code Debugger:
         http://qrlogo.kaarposoft.dk/qrdecode.html
@@ -63,13 +65,13 @@ class QRCodeBuilder:
         self.data = data
 
         #Check that the user passed in a valid mode
-        if mode in tables.modes.keys():
+        if mode in tables.modes:
             self.mode = tables.modes[mode]
         else:
             raise ValueError('{0} is not a valid mode.'.format(mode))
 
         #Check that the user passed in a valid error level
-        if error in tables.error_level.keys():
+        if error in tables.error_level:
             self.error = tables.error_level[error]
         else:
             raise ValueError('{0} is not a valid error '
@@ -131,7 +133,10 @@ class QRCodeBuilder:
 
         data_length = tables.data_length_field[max_version][self.mode]
 
-        length_string = self.binary_string(len(self.data), data_length)
+        if self.mode != tables.modes['kanji']:
+            length_string = self.binary_string(len(self.data), data_length)
+        else:
+            length_string = self.binary_string(len(self.data) / 2, data_length)
 
         if len(length_string) > data_length:
             raise ValueError('The supplied data will not fit '
@@ -148,9 +153,8 @@ class QRCodeBuilder:
             encoded = self.encode_numeric()
         elif self.mode == tables.modes['binary']:
             encoded = self.encode_bytes()
-        else:
-            raise ValueError('This mode is not yet implemented.')
-
+        elif self.mode == tables.modes['kanji']:
+            encoded = self.encode_kanji()
         return encoded
 
     def encode_alphanumeric(self):
@@ -167,7 +171,7 @@ class QRCodeBuilder:
                 ascii.append(tables.ascii_codes[chr(char)])
             else:
                 ascii.append(tables.ascii_codes[char])
-
+        
         #Now perform the algorithm that will make the ascii into bit fields
         with io.StringIO() as buf:
             for (a,b) in self.grouper(2, ascii):
@@ -190,9 +194,12 @@ class QRCodeBuilder:
             for triplet in self.grouper(3, self.data):
                 number = ''
                 for digit in triplet:
+                    if isinstance(digit, int):
+                        digit = chr(digit)
+
                     #Only build the string if digit is not None
                     if digit:
-                        number = ''.join([number, str(digit)])
+                        number = ''.join([number, digit])
                     else:
                         break
 
@@ -223,6 +230,49 @@ class QRCodeBuilder:
                     buf.write('{{0:0{0}b}}'.format(8).format(char))
             return buf.getvalue()
 
+    def encode_kanji(self):
+        """This method encodes the QR code's data if its mode is
+        kanji. It returns the data encoded as a binary string.
+        """
+        def two_bytes(data):
+            """Output two byte character code as a single integer."""
+            def next_byte(b):
+                """Make sure that character code is an int. Python 2 and
+                3 compatibility.
+                """
+                if not isinstance(b, int):
+                    return ord(b)
+                else:
+                    return b
+
+            #Go through the data by looping to every other character
+            for i in range(0, len(data), 2):
+                yield (next_byte(data[i]) << 8) | next_byte(data[i+1])
+
+        #Force the data into Kanji encoded bytes
+        if isinstance(self.data, bytes):
+            data = self.data.decode('shiftjis').encode('shiftjis')
+        else:
+            data = self.data.encode('shiftjis')
+        
+        #Now perform the algorithm that will make the kanji into 13 bit fields
+        with io.StringIO() as buf:
+            for asint in two_bytes(data):
+                #Shift the two byte value as indicated by the standard
+                if 0x8140 <= asint <= 0x9FFC:
+                    difference = asint - 0x8140
+                elif 0xE040 <= asint <= 0xEBBF:
+                    difference = asint - 0xC140
+
+                #Split the new value into most and least significant bytes
+                msb = (difference >> 8)
+                lsb = (difference & 0x00FF)
+
+                #Calculate the actual 13 bit binary value
+                buf.write('{0:013b}'.format((msb * 0xC0) + lsb))
+            #Return the binary string
+            return buf.getvalue()
+
 
     def add_data(self):
         """This function properly constructs a QR code's data string. It takes
@@ -233,6 +283,14 @@ class QRCodeBuilder:
         self.buffer.write(self.get_data_length())
         self.buffer.write(self.encode())
 
+        #Converts the buffer into "code word" integers.
+        #The online debugger outputs them this way, makes
+        #for easier comparisons.
+        #s = self.buffer.getvalue()
+        #for i in range(0, len(s), 8):
+        #    print(int(s[i:i+8], 2), end=',')
+        #print()
+        
         #Fix for issue #3: https://github.com/mnooner256/pyqrcode/issues/3#
         #I was performing the terminate_bits() part in the encoding.
         #As per the standard, terminating bits are only supposed to
@@ -247,11 +305,11 @@ class QRCodeBuilder:
         add_bits = self.delimit_words()
         if add_bits:
             self.buffer.write(add_bits)
-
+        
         fill_bytes = self.add_words()
         if fill_bytes:
             self.buffer.write(fill_bytes)
-
+        
         #Get a numeric representation of the data
         data = [int(''.join(x),2)
                     for x in self.grouper(8, self.buffer.getvalue())]
@@ -278,7 +336,7 @@ class QRCodeBuilder:
         for n_data_blocks in data_block_sizes:
             data_blocks.append(data[current_byte:current_byte+n_data_blocks])
             current_byte += n_data_blocks
-
+        
         #I am not sure about the test after the "and". This was added to
         #fix a bug where after delimit_words padded the bit stream, a zero
         #byte ends up being added. After checking around, it seems this extra
@@ -347,7 +405,7 @@ class QRCodeBuilder:
         the encoded string contains only full bytes.
         """
         bits_short = 8 - (len(self.buffer.getvalue()) % 8)
-
+        
         #The string already falls on an byte boundary do nothing
         if bits_short == 0 or bits_short == 8:
             return None
@@ -372,11 +430,6 @@ class QRCodeBuilder:
 
         #Create a string of the needed blocks
         return ''.join([next(block) for x in range(needed_blocks)])
-
-    def _fix_exp(self, exponent):
-        """Makes sure the exponent ranges from 0 to 255."""
-        #return (exponent % 256) + (exponent // 256)
-        return exponent % 255
 
     def make_error_block(self, block, block_number):
         """This function constructs the error correction block of the
@@ -852,39 +905,25 @@ class QRCodeBuilder:
 ##############################################################################
 
 def _get_writable(stream_or_path, mode):
-    """This method returns the `stream_or_path` parameter if it is an open
-    writable stream. Otherwise it treats the `stream_or_path` parameter as
-    file path and opens it with the given mode.
-    It is used by the svg and png methods to interpret the file parameter.
-    """
-    import os.path
-    is_stream = hasattr(stream_or_path, 'write')
-    if not is_stream:
-        # No stream provided, treat "file" as path
-        stream_or_path = open(os.path.abspath(stream_or_path), mode)
-    return stream_or_path, not is_stream
-
-def _get_file(file, mode):
     """This method returns a tuple containing the stream and a flag to indicate
     if the stream should be automatically closed.
 
-    The file parameter is returned if it is an open writable stream. Otherwise.
-    it treats the file parameter as a file path and opens it with the given
-    mode.
+    The `stream_or_path` parameter is returned if it is an open writable stream.
+    Otherwise, it treats the `stream_or_path` parameter as a file path and
+    opens it with the given mode.
 
     It is used by the svg and png methods to interpret the file parameter.
 
-    :type file: str | io.BufferedIOBase
+    :type stream_or_path: str | io.BufferedIOBase
     :type mode: str | unicode
     :rtype: (io.BufferedIOBase, bool)
     """
-    import os.path
-    #See if the file parameter is a stream
-    if not hasattr(file, 'write'):
-        #If it is not a stream open a the file path
-        return open(os.path.abspath(file), mode), True
-    else:
-        return file, False
+    is_stream = hasattr(stream_or_path, 'write')
+    if not is_stream:
+        # No stream provided, treat "stream_or_path" as path
+        stream_or_path = open(stream_or_path, mode)
+    return stream_or_path, not is_stream
+
 
 def _get_png_size(version, scale, quiet_zone=4):
     """See: QRCode.get_png_size
@@ -896,6 +935,7 @@ def _get_png_size(version, scale, quiet_zone=4):
     """
     #Formula: scale times number of modules plus the border on each side
     return (int(scale) * tables.version_size[version]) + (2 * quiet_zone * int(scale))
+
 
 def _terminal(code, module_color='default', background='reverse', quiet_zone=4):
     """This method returns a string containing ASCII escape codes,
@@ -960,7 +1000,7 @@ def _terminal(code, module_color='default', background='reverse', quiet_zone=4):
                 buf.write(data)
             elif bit == 0:
                 buf.write(background)
-
+        
         #Each row ends with a quiet zone on the right side, this is the
         #right hand border background modules
         draw_border()
@@ -1001,7 +1041,7 @@ def _text(code, quiet_zone=4):
             #unset pixels will be spaces.
             else:
                 buf.write(' ')
-
+        
         #Draw the ending quiet zone
         for b in range(quiet_zone):
             buf.write('0')
@@ -1012,6 +1052,56 @@ def _text(code, quiet_zone=4):
         buf.write(border_row)
         buf.write('\n')
 
+    return buf.getvalue()
+
+def _xbm(code, scale=1, quiet_zone=4):
+    """This function will format the QR code as a X BitMap.
+    This can be used to display the QR code with Tkinter.
+    """
+    try:
+        str = unicode  # Python 2
+    except NameError:
+        str = __builtins__['str']
+        
+    buf = io.StringIO()
+    
+    # Calculate the width in pixels
+    pixel_width = (len(code[0]) + quiet_zone * 2) * scale
+    
+    # Add the size information and open the pixel data section
+    buf.write('#define im_width ')
+    buf.write(str(pixel_width))
+    buf.write('\n')
+    buf.write('#define im_height ')
+    buf.write(str(pixel_width))
+    buf.write('\n')
+    buf.write('static char im_bits[] = {\n')
+    
+    # Calculate the number of bytes per row
+    byte_width = int(math.ceil(pixel_width / 8.0))
+    
+    # Add the top quiet zone
+    buf.write(('0x00,' * byte_width + '\n') * quiet_zone * scale)
+    for row in code:
+        # Add the left quiet zone
+        row_bits = '0' * quiet_zone * scale
+        # Add the actual QR code
+        for pixel in row:
+            row_bits += str(pixel) * scale
+        # Add the right quiet zone
+        row_bits += '0' * quiet_zone * scale
+        # Format the row
+        formated_row = ''
+        for b in range(byte_width):
+            formated_row += '0x{0:02x},'.format(int(row_bits[:8][::-1], 2))
+            row_bits = row_bits[8:]
+        formated_row += '\n'
+        # Add the formatted row
+        buf.write(formated_row * scale)
+    # Add the bottom quiet zone and close the pixel data section
+    buf.write(('0x00,' * byte_width + '\n') * quiet_zone * scale)
+    buf.write('};')
+    
     return buf.getvalue()
 
 def _svg(code, version, file, scale=1, module_color='#000', background=None,
@@ -1177,7 +1267,7 @@ def _png(code, version, file, scale=1, module_color=(0, 0, 0, 255),
         import png
     except ImportError:
         from . import png
-
+    
     # Coerce scale parameter into an integer
     try:
         scale = int(scale)
@@ -1330,12 +1420,16 @@ def _eps(code, version, file_or_path, scale=1, module_color=(0, 0, 0),
     """
     from functools import partial
     import time
+    import textwrap
 
     def write_line(writemeth, content):
         """\
         Writes `content` and ``LF``.
         """
-        writemeth(content + '\n')
+        # Postscript: Max. 255 characters per line
+        for line in textwrap.wrap(content, 255):
+            writemeth(line)
+            writemeth('\n')
 
     def line(offset, length):
         """\
@@ -1380,7 +1474,7 @@ def _eps(code, version, file_or_path, scale=1, module_color=(0, 0, 0),
     writeline('/M { moveto } bind def')
     writeline('/m { rmoveto } bind def')
     writeline('/l { rlineto } bind def')
-    mod_color = (0, 0, 0) if module_color == (0, 0, 0) else rgb_to_floats(module_color)
+    mod_color = module_color if module_color == (0, 0, 0) else rgb_to_floats(module_color)
     if background is not None:
         writeline('{0:f} {1:f} {2:f} setrgbcolor clippath fill'
                   .format(*rgb_to_floats(background)))
@@ -1389,7 +1483,7 @@ def _eps(code, version, file_or_path, scale=1, module_color=(0, 0, 0),
             # In case module color != black set the module RGB color later
             writeline('0 0 0 setrgbcolor')
     if mod_color != (0, 0, 0):
-        writeline('{0:f} {1:f} {2:f} setrgbcolor'.format(*rgb_to_floats(module_color)))
+        writeline('{0:f} {1:f} {2:f} setrgbcolor'.format(*mod_color))
     if scale != 1:
         writeline('{0} {0} scale'.format(scale))
     writeline('newpath')

@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 import xbmc
+import xbmcvfs
+try:
+    from xbmcvfs import translatePath as xbmcTranslatePath
+except ImportError:
+    from xbmc import translatePath as xbmcTranslatePath
 import os
 import binascii
 import json
-import util
-import jsonqueue
+import AddonSignals
+from . import util
+from . import jsonqueue
 
 IS_WEB = False
 try:
     import xbmcgui
 except ImportError:
     IS_WEB = True
-
-BASE_COMMAND = 'XBMC.NotifyAll(script.module.youtube.dl,{0},"{{{1}}}")'
-BASE_ARG = '\\"{0}\\":\\"{1}\\"'
 
 
 def safeEncode(text):
@@ -25,30 +28,17 @@ def safeDecode(enc_text):
 
 
 class ServiceControl(object):
-    def sendCommand(self, command, **kwargs):
-        args = []
-        for k, v in kwargs.items():
-            args.append(BASE_ARG.format(k, safeEncode(v)))
-        command = BASE_COMMAND.format(command, ','.join(args))
-        xbmc.executebuiltin(command)
-
-    def processCommandData(self, data):
-        args = json.loads(data)
-        for k in args.keys():
-            v = args[k]
-            args[k] = safeDecode(v)
-        return args
-
     def download(self, info, path, duration):
-        addonPath = xbmc.translatePath(util.ADDON.getAddonInfo('path')).decode('utf-8')
+        addonPath = xbmcTranslatePath(util.ADDON.getAddonInfo('path')).decode('utf-8')
         service = os.path.join(addonPath, 'service.py')
-        data = {'data': info, 'path': path, 'duration': duration}
+        data = {'data': info, 'path': path, 'filename': filename, 'duration': duration}
+
         dataJSON = json.dumps(data)
         jsonqueue.XBMCJsonRAFifoQueue(util.QUEUE_FILE).push(binascii.hexlify(dataJSON))
         xbmc.executebuiltin('RunScript({0})'.format(service))
 
     def stopDownload(self):
-        self.sendCommand('DOWNLOAD_STOP')
+        AddonSignals.sendSignal('DOWNLOAD_STOP')
 
     def stopAllDownloads(self):
         jsonqueue.XBMCJsonRAFifoQueue(util.QUEUE_FILE).clear()

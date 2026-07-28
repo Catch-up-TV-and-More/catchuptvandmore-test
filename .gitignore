@@ -34,3 +34,9 @@ Temporary Items
 
 # VSCode
 /.vscode
+
+#pycharm
+/.idea/
+
+/.urlquick.cache/
+/venv/

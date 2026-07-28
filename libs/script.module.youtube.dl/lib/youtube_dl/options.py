@@ -134,7 +134,7 @@ def parseOpts(overrideArguments=None):
         action='help',
         help='Print this help text and exit')
     general.add_option(
-        '-v', '--version',
+        '--version',
         action='version',
         help='Print program version and exit')
     general.add_option(
@@ -369,7 +369,7 @@ def parseOpts(overrideArguments=None):
     authentication.add_option(
         '--video-password',
         dest='videopassword', metavar='PASSWORD',
-        help='Video password (vimeo, smotri, youku)')
+        help='Video password (vimeo, youku)')
 
     adobe_pass = optparse.OptionGroup(parser, 'Adobe Pass Options')
     adobe_pass.add_option(
@@ -690,6 +690,10 @@ def parseOpts(overrideArguments=None):
         dest='outtmpl', metavar='TEMPLATE',
         help=('Output filename template, see the "OUTPUT TEMPLATE" for all the info'))
     filesystem.add_option(
+        '--output-na-placeholder',
+        dest='outtmpl_na_placeholder', metavar='PLACEHOLDER', default='NA',
+        help=('Placeholder value for unavailable meta fields in output filename template (default is "%default")'))
+    filesystem.add_option(
         '--autonumber-size',
         dest='autonumber_size', metavar='NUMBER', type=int,
         help=optparse.SUPPRESS_HELP)
@@ -782,7 +786,7 @@ def parseOpts(overrideArguments=None):
     postproc.add_option(
         '-x', '--extract-audio',
         action='store_true', dest='extractaudio', default=False,
-        help='Convert video files to audio-only files (requires ffmpeg or avconv and ffprobe or avprobe)')
+        help='Convert video files to audio-only files (requires ffmpeg/avconv and ffprobe/avprobe)')
     postproc.add_option(
         '--audio-format', metavar='FORMAT', dest='audioformat', default='best',
         help='Specify audio format: "best", "aac", "flac", "mp3", "m4a", "opus", "vorbis", or "wav"; "%default" by default; No effect without -x')
@@ -853,7 +857,7 @@ def parseOpts(overrideArguments=None):
     postproc.add_option(
         '--exec',
         metavar='CMD', dest='exec_cmd',
-        help='Execute a command on the file after downloading, similar to find\'s -exec syntax. Example: --exec \'adb push {} /sdcard/Music/ && rm {}\'')
+        help='Execute a command on the file after downloading and post-processing, similar to find\'s -exec syntax. Example: --exec \'adb push {} /sdcard/Music/ && rm {}\'')
     postproc.add_option(
         '--convert-subs', '--convert-subtitles',
         metavar='FORMAT', dest='convertsubtitles', default=None,

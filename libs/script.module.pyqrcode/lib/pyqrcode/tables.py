@@ -9,7 +9,7 @@
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of the copyright holder nor the names of its
+#     * Neither the name of the copyright holder nor the names of its 
 #       contributors may be used to endorse or promote products derived from
 #       this software without specific prior written permission
 #
@@ -760,7 +760,7 @@ mask_patterns = [
     lambda row, col: (((row + col) % 2) + ((row * col) % 3)) % 2 == 0]
 
 
-#: This is a table of ASCII excape code for terminal colors. QR codes
+#: This is a table of ASCII escape code for terminal colors. QR codes
 #: are drawn using a space with a colored background. Hence, only
 #: codes affecting background colors have been added.
 #: http://misc.flogisoft.com/bash/tip_colors_and_formatting

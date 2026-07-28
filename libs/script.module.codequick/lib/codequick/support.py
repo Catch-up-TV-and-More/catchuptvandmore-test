@@ -2,10 +2,10 @@
 from __future__ import absolute_import
 
 # Standard Library Imports
+import importlib
 import binascii
 import inspect
 import logging
-import pickle
 import time
 import sys
 import re
@@ -18,14 +18,19 @@ import xbmc
 # Package imports
 from codequick.utils import parse_qs, ensure_native_str, urlparse, PY3, unicode_type
 
-# Hack simulator
-from runtime_error import RuntimeErrorCQ
+try:
+    # noinspection PyPep8Naming
+    import cPickle as pickle
+except ImportError:  # pragma: no cover
+    import pickle
 
 if PY3:
     from inspect import getfullargspec
+    PICKLE_PROTOCOL = 4
 else:
     # noinspection PyDeprecation
     from inspect import getargspec as getfullargspec
+    PICKLE_PROTOCOL = 2
 
 script_data = xbmcaddon.Addon("script.module.codequick")
 addon_data = xbmcaddon.Addon()
@@ -39,19 +44,20 @@ logger = logging.getLogger("%s.support" % logger_id)
 # Listitem auto sort methods
 auto_sort = set()
 
+logging_map = {
+    10: xbmc.LOGDEBUG,
+    20: xbmc.LOGINFO if PY3 else xbmc.LOGNOTICE,
+    30: xbmc.LOGWARNING,
+    40: xbmc.LOGERROR,
+    50: xbmc.LOGFATAL,
+}
 
-class LoggingMap(dict):
-    def __init__(self):
-        super(LoggingMap, self).__init__()
-        self[10] = xbmc.LOGDEBUG    # logger.debug
-        self[20] = xbmc.LOGNOTICE   # logger.info
-        self[30] = xbmc.LOGWARNING  # logger.warning
-        self[40] = xbmc.LOGERROR    # logger.error
-        self[50] = xbmc.LOGFATAL    # logger.critical
 
-    def __missing__(self, key):
-        """Return log notice for any unexpected log level."""
-        return xbmc.LOGNOTICE
+class RouteMissing(KeyError):
+    """
+    Exception class that is raisd when no
+    route is found in the registered routes.
+    """
 
 
 class KodiLogHandler(logging.Handler):
@@ -67,7 +73,6 @@ class KodiLogHandler(logging.Handler):
     def __init__(self):
         super(KodiLogHandler, self).__init__()
         self.setFormatter(logging.Formatter("[%(name)s] %(message)s"))
-        self.log_level_map = LoggingMap()
         self.debug_msgs = []
 
     def emit(self, record):  # type: (logging.LogRecord) -> None
@@ -76,7 +81,7 @@ class KodiLogHandler(logging.Handler):
         log_level = record.levelno
 
         # Forward the log record to kodi with translated log level
-        xbmc.log(formatted_msg, self.log_level_map[log_level])
+        xbmc.log(formatted_msg, logging_map.get(log_level, 10))
 
         # Keep a history of all debug records so they can be logged later if a critical error occurred
         # Kodi by default, won't show debug messages unless debug logging is enabled
@@ -91,55 +96,49 @@ class KodiLogHandler(logging.Handler):
             xbmc.log("###### debug ######", xbmc.LOGWARNING)
 
 
-class Route(object):
+class CallbackRef(object):
+    __slots__ = ("path", "parent", "is_playable", "is_folder")
+
+    def __init__(self, path, parent):
+        self.path = path.rstrip("/").replace(":", "/")
+        self.is_playable = parent.is_playable
+        self.is_folder = parent.is_folder
+        self.parent = parent
+
+    def __eq__(self, other):
+        return self.path == other.path
+
+
+class Route(CallbackRef):
     """
     Handle callback route data.
 
     :param callback: The callable callback function.
     :param parent: The parent class that will handle the response from callback.
     :param str path: The route path to func/class.
-
-    :ivar bool is_playable: True if callback is playable, else False.
-    :ivar bool is_folder: True if callback is a folder, else False.
-    :ivar callback: The decorated func/class.
-    :ivar callback: The callable callback function.
-    :ivar parent: The parent class that will handle the response from callback.
-    :ivar str path: The route path to func/class.
+    :param dict parameters: Dict of parameters to pass to plugin instance.
     """
-    __slots__ = ("parent", "function", "callback", "path", "is_playable", "is_folder")
+    __slots__ = ("function", "callback", "parameters")
 
-    def __eq__(self, other):
-        return self.path == other.path
-
-    def __init__(self, callback, parent, path):
+    def __init__(self, callback, parent, path, parameters):
         # Register a class callback
         if inspect.isclass(callback):
+            msg = "Use of class based callbacks are Deprecated, please use function callbacks"
+            logger.warning("DeprecationWarning: " + msg)
             if hasattr(callback, "run"):
-                self.parent = parent = callback
+                parent = callback
                 self.function = callback.run
                 callback.test = staticmethod(self.unittest_caller)
             else:
                 raise NameError("missing required 'run' method for class: '{}'".format(callback.__name__))
         else:
             # Register a function callback
-            self.parent = parent
-            self.function = callback
             callback.test = self.unittest_caller
+            self.parameters = parameters
+            self.function = callback
 
-        self.is_playable = parent.is_playable
-        self.is_folder = parent.is_folder
+        super(Route, self).__init__(path, parent)
         self.callback = callback
-        self.path = path
-
-    def args_to_kwargs(self, args, kwargs):  # type: (tuple, dict) -> None
-        """Convert positional arguments to keyword arguments and merge into callback parameters."""
-        callback_args = self.arg_names()[1:]
-        arg_map = zip(callback_args, args)
-        kwargs.update(arg_map)
-
-    def arg_names(self):  # type: () -> list
-        """Return a list of argument names, positional and keyword arguments."""
-        return getfullargspec(self.function).args
 
     def unittest_caller(self, *args, **kwargs):
         """
@@ -163,7 +162,7 @@ class Route(object):
         # Update support params with the params
         # that are to be passed to callback
         if args:
-            self.args_to_kwargs(args, dispatcher.params)
+            dispatcher.params["_args_"] = args
 
         if kwargs:
             dispatcher.params.update(kwargs)
@@ -233,27 +232,39 @@ class Dispatcher(object):
                                     if not (key.startswith(u"_") and key.endswith(u"_"))}
 
     def get_route(self, path=None):  # type: (str) -> Route
-        """Return the given route object."""
-        return self.registered_routes[path if path else self.selector]
-
-    def register_callback(self, callback, parent):
         """
-        Register route callback function
+        Return the given route callback.
 
-        :param callback: The callback function.
-        :param parent: Parent class that will handle the callback, used when callback is a function.
-        :returns: The callback function with extra attributes added, 'route', 'testcall'.
+        :param str path: The route path, if not given defaults to current callback
         """
+        path = path.rstrip("/") if path else self.selector.rstrip("/")
+
+        # Attempt to import the module where the route
+        # is located if it's not already registered
+        if path not in self.registered_routes:
+            module_path = "resources.lib.main" if path == "root" else ".".join(path.strip("/").split("/")[:-1])
+            logger.debug("Attempting to import route: %s", module_path)
+            try:
+                importlib.import_module(module_path)
+            except ImportError:
+                raise RouteMissing("unable to import route module: %s" % module_path)
+        try:
+            return self.registered_routes[path]
+        except KeyError:
+            raise RouteMissing(path)
+
+    def register_callback(self, callback, parent, parameters):
+        """Register route callback function"""
         # Construct route path
         path = callback.__name__.lower()
         if path != "root":
-            path = "/{}/{}/".format(callback.__module__.strip("_").replace(".", "/"), callback.__name__).lower()
+            path = "/{}/{}".format(callback.__module__.strip("_").replace(".", "/"), callback.__name__).lower()
 
         # Register callback
         if path in self.registered_routes:
             logger.debug("encountered duplicate route: '%s'", path)
 
-        self.registered_routes[path] = route = Route(callback, parent, path)
+        self.registered_routes[path] = route = Route(callback, parent, path, parameters)
         callback.route = route
         return callback
 
@@ -284,21 +295,15 @@ class Dispatcher(object):
         logger.debug("Dispatching to route: '%s'", self.selector)
         logger.debug("Callback parameters: '%s'", self.callback_params)
 
-        RuntimeErrorCQ.last_codequick_route = self.selector
-        RuntimeErrorCQ.last_codequick_callback_params = self.callback_params
-
         try:
             # Fetch the controling class and callback function/method
-            route = self.get_route()
+            route = self.get_route(self.selector)
             execute_time = time.time()
-            redirect = None
 
             # Initialize controller and execute callback
             parent_ins = route.parent()
-            results = route.function(parent_ins, **self.callback_params)
-            if hasattr(parent_ins, "_process_results"):
-                # noinspection PyProtectedMember
-                redirect = parent_ins._process_results(results)
+            arg_params = self.params.get("_args_", [])
+            redirect = parent_ins(route, arg_params, self.callback_params)
 
         except Exception as e:
             self.run_delayed(e)
@@ -316,13 +321,9 @@ class Dispatcher(object):
                 msg = unicode_type(e).encode("utf8")
 
             # Log the error in both the gui and the kodi log file
-            logger.critical(msg, exc_info=1)
+            logger.exception(msg)
             dialog = xbmcgui.Dialog()
             dialog.notification(e.__class__.__name__, msg, addon_data.getAddonInfo("icon"))
-
-            # RuntimeErrorCQ.last_error_message = msg
-            RuntimeErrorCQ.last_menu_triggered_error = True
-            
             return e
 
         else:
@@ -356,7 +357,7 @@ class Dispatcher(object):
 
 def build_path(callback=None, args=None, query=None, **extra_query):
     """
-    Build addon url that can be passeed to kodi for kodi to use when calling listitems.
+    Build addon url that can be passed to kodi for kodi to use when calling listitems.
 
     :param callback: [opt] The route selector path referencing the callback object. (default => current route selector)
     :param tuple args: [opt] Positional arguments that will be add to plugin path.
@@ -368,11 +369,20 @@ def build_path(callback=None, args=None, query=None, **extra_query):
     """
 
     # Set callback to current callback if not given
-    route = callback.route if callback else dispatcher.get_route()
+    if callback and hasattr(callback, "route"):
+        route = callback.route
+    elif isinstance(callback, CallbackRef):
+        route = callback
+    elif callback:
+        msg = "passing in callback path is deprecated, use callback reference 'Route.ref' instead"
+        logger.warning("DeprecationWarning: " + msg)
+        route = dispatcher.get_route(callback)
+    else:
+        route = dispatcher.get_route()
 
     # Convert args to keyword args if required
     if args:
-        route.args_to_kwargs(args, query)
+        query["_args_"] = args
 
     # If extra querys are given then append the
     # extra querys to the current set of querys
@@ -382,11 +392,12 @@ def build_path(callback=None, args=None, query=None, **extra_query):
 
     # Encode the query parameters using json
     if query:
-        pickled = binascii.hexlify(pickle.dumps(query, protocol=pickle.HIGHEST_PROTOCOL))
+        pickled = binascii.hexlify(pickle.dumps(query, protocol=PICKLE_PROTOCOL))
         query = "_pickle_={}".format(pickled.decode("ascii") if PY3 else pickled)
 
     # Build kodi url with new path and query parameters
-    return urlparse.urlunsplit(("plugin", plugin_id, route.path, query, ""))
+    # NOTE: Kodi really needs a trailing '/'
+    return urlparse.urlunsplit(("plugin", plugin_id, route.path + "/", query, ""))
 
 
 # Setup kodi logging
@@ -399,3 +410,4 @@ base_logger.propagate = False
 # Dispatcher to manage route callbacks
 dispatcher = Dispatcher()
 run = dispatcher.run_callback
+get_route = dispatcher.get_route

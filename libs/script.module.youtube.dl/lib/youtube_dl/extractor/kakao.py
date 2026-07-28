@@ -3,17 +3,21 @@
 from __future__ import unicode_literals
 
 from .common import InfoExtractor
-from ..compat import compat_str
+from ..compat import compat_HTTPError
 from ..utils import (
+    ExtractorError,
     int_or_none,
+    str_or_none,
+    strip_or_none,
+    try_get,
     unified_timestamp,
     update_url_query,
 )
 
 
 class KakaoIE(InfoExtractor):
-    _VALID_URL = r'https?://tv\.kakao\.com/channel/(?P<channel>\d+)/cliplink/(?P<id>\d+)'
-    _API_BASE = 'http://tv.kakao.com/api/v1/ft/cliplinks'
+    _VALID_URL = r'https?://(?:play-)?tv\.kakao\.com/(?:channel/\d+|embed/player)/cliplink/(?P<id>\d+|[^?#&]+@my)'
+    _API_BASE_TMPL = 'http://tv.kakao.com/api/v1/ft/cliplinks/%s/'
 
     _TESTS = [{
         'url': 'http://tv.kakao.com/channel/2671005/cliplink/301965083',
@@ -22,7 +26,7 @@ class KakaoIE(InfoExtractor):
             'id': '301965083',
             'ext': 'mp4',
             'title': '乃木坂46 バナナマン 「3期生紹介コーナーが始動！顔高低差GPも！」 『乃木坂工事中』',
-            'uploader_id': 2671005,
+            'uploader_id': '2671005',
             'uploader': '그랑그랑이',
             'timestamp': 1488160199,
             'upload_date': '20170227',
@@ -35,15 +39,21 @@ class KakaoIE(InfoExtractor):
             'ext': 'mp4',
             'description': '러블리즈 - Destiny (나의 지구) (Lovelyz - Destiny)\r\n\r\n[쇼! 음악중심] 20160611, 507회',
             'title': '러블리즈 - Destiny (나의 지구) (Lovelyz - Destiny)',
-            'uploader_id': 2653210,
-            'uploader': '쇼 음악중심',
+            'uploader_id': '2653210',
+            'uploader': '쇼! 음악중심',
             'timestamp': 1485684628,
             'upload_date': '20170129',
         }
+    }, {
+        # geo restricted
+        'url': 'https://tv.kakao.com/channel/3643855/cliplink/412069491',
+        'only_matching': True,
     }]
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
+        display_id = video_id.rstrip('@my')
+        api_base = self._API_BASE_TMPL % video_id
 
         player_header = {
             'Referer': update_url_query(
@@ -55,20 +65,22 @@ class KakaoIE(InfoExtractor):
                 })
         }
 
-        QUERY_COMMON = {
+        query = {
             'player': 'monet_html5',
             'referer': url,
             'uuid': '',
             'service': 'kakao_tv',
             'section': '',
             'dteType': 'PC',
+            'fields': ','.join([
+                '-*', 'tid', 'clipLink', 'displayTitle', 'clip', 'title',
+                'description', 'channelId', 'createTime', 'duration', 'playCount',
+                'likeCount', 'commentCount', 'tagList', 'channel', 'name', 'thumbnailUrl',
+                'videoOutputList', 'width', 'height', 'kbps', 'profile', 'label'])
         }
 
-        query = QUERY_COMMON.copy()
-        query['fields'] = 'clipLink,clip,channel,hasPlusFriend,-service,-tagList'
         impress = self._download_json(
-            '%s/%s/impress' % (self._API_BASE, video_id),
-            video_id, 'Downloading video info',
+            api_base + 'impress', display_id, 'Downloading video info',
             query=query, headers=player_header)
 
         clip_link = impress['clipLink']
@@ -76,34 +88,28 @@ class KakaoIE(InfoExtractor):
 
         title = clip.get('title') or clip_link.get('displayTitle')
 
-        tid = impress.get('tid', '')
-
-        query = QUERY_COMMON.copy()
         query.update({
-            'tid': tid,
-            'profile': 'HIGH',
+            'fields': '-*,code,message,url',
+            'tid': impress.get('tid') or '',
         })
-        raw = self._download_json(
-            '%s/%s/raw' % (self._API_BASE, video_id),
-            video_id, 'Downloading video formats info',
-            query=query, headers=player_header)
 
         formats = []
-        for fmt in raw.get('outputList', []):
+        for fmt in (clip.get('videoOutputList') or []):
             try:
                 profile_name = fmt['profile']
-                fmt_url_json = self._download_json(
-                    '%s/%s/raw/videolocation' % (self._API_BASE, video_id),
-                    video_id,
-                    'Downloading video URL for profile %s' % profile_name,
-                    query={
-                        'service': 'kakao_tv',
-                        'section': '',
-                        'tid': tid,
-                        'profile': profile_name
-                    }, headers=player_header, fatal=False)
-
-                if fmt_url_json is None:
+                if profile_name == 'AUDIO':
+                    continue
+                query['profile'] = profile_name
+                try:
+                    fmt_url_json = self._download_json(
+                        api_base + 'raw/videolocation', display_id,
+                        'Downloading video URL for profile %s' % profile_name,
+                        query=query, headers=player_header)
+                except ExtractorError as e:
+                    if isinstance(e.cause, compat_HTTPError) and e.cause.code == 403:
+                        resp = self._parse_json(e.cause.read().decode(), video_id)
+                        if resp.get('code') == 'GeoBlocked':
+                            self.raise_geo_restricted()
                     continue
 
                 fmt_url = fmt_url_json['url']
@@ -113,37 +119,25 @@ class KakaoIE(InfoExtractor):
                     'width': int_or_none(fmt.get('width')),
                     'height': int_or_none(fmt.get('height')),
                     'format_note': fmt.get('label'),
-                    'filesize': int_or_none(fmt.get('filesize'))
+                    'filesize': int_or_none(fmt.get('filesize')),
+                    'tbr': int_or_none(fmt.get('kbps')),
                 })
             except KeyError:
                 pass
         self._sort_formats(formats)
 
-        thumbs = []
-        for thumb in clip.get('clipChapterThumbnailList', []):
-            thumbs.append({
-                'url': thumb.get('thumbnailUrl'),
-                'id': compat_str(thumb.get('timeInSec')),
-                'preference': -1 if thumb.get('isDefault') else 0
-            })
-        top_thumbnail = clip.get('thumbnailUrl')
-        if top_thumbnail:
-            thumbs.append({
-                'url': top_thumbnail,
-                'preference': 10,
-            })
-
         return {
-            'id': video_id,
+            'id': display_id,
             'title': title,
-            'description': clip.get('description'),
-            'uploader': clip_link.get('channel', {}).get('name'),
-            'uploader_id': clip_link.get('channelId'),
-            'thumbnails': thumbs,
+            'description': strip_or_none(clip.get('description')),
+            'uploader': try_get(clip_link, lambda x: x['channel']['name']),
+            'uploader_id': str_or_none(clip_link.get('channelId')),
+            'thumbnail': clip.get('thumbnailUrl'),
             'timestamp': unified_timestamp(clip_link.get('createTime')),
             'duration': int_or_none(clip.get('duration')),
             'view_count': int_or_none(clip.get('playCount')),
             'like_count': int_or_none(clip.get('likeCount')),
             'comment_count': int_or_none(clip.get('commentCount')),
             'formats': formats,
+            'tags': clip.get('tagList'),
         }

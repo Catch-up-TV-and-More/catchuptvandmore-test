@@ -1,3 +1,31 @@
+*** 21.303.0 ***
+
+Updated youtube-dl core to 2021.03.03
+Add merge capability (thanks jmzambon)
+
+*** 21.302.0 ***
+
+Updated youtube-dl core to 2021.03.02
+
+*** 21.204.0 ***
+
+Use xbmc.LOGINFO
+Updated youtube-dl core to 2021.02.04.1
+
+*** 20.616.0 ***
+
+Updated youtube-dl core to 2020.06.16.1
+Use new abortRequested API
+
+*** 20.324.0 ***
+
+Add Python 3 compatibility
+Updated youtube-dl core to 2020.03.24
+
+*** 19.912.1 ***
+
+Add German translation - (Thanks CurlingTongs)
+Updates for AddonSignals module
 
 *** 19.912.0 ***
 
@@ -11,8 +39,8 @@ Updated youtube-dl core to 2018.11.7
 *** 18.619.0 ***
 
 Updated youtube-dl core to 2018.06.19
-Added dutch translation - (Thanks Quihico)
-Added greek translations - (Thanks Twilight0)
+Added Dutch translation - (Thanks Quihico)
+Added Greek translations - (Thanks Twilight0)
 
 *** 18.425.0 ***
 

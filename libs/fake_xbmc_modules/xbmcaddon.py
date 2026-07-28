@@ -13,7 +13,8 @@ ADDONS_SETTINGS = {
     'plugin.video.catchuptvandmore': Config.get('addon_settings'),
     'script.module.codequick': Config.get('codequick_fake_settings'),
     'script.module.inputstreamhelper': Config.get('inputstreamhelper_fake_settings'),
-    'script.module.youtube.dl': Config.get('youtubedl_fake_settings')
+    'script.module.youtube.dl': Config.get('youtubedl_fake_settings'),
+    'inputstream.adaptive': Config.get('addon_settings')
 }
 
 
@@ -21,7 +22,8 @@ ADDONS_LABELS = {
     'plugin.video.catchuptvandmore': Config.get('addon_labels'),
     'script.module.codequick': Config.get('codequick_labels'),
     'script.module.inputstreamhelper': Config.get('inputstreamhelper_labels'),
-    'script.module.youtube.dl': Config.get('youtubedl_labels')
+    'script.module.youtube.dl': Config.get('youtubedl_labels'),
+    'inputstream.adaptive': Config.get('addon_labels')
 }
 
 
@@ -29,7 +31,8 @@ ADDONS_NAMES = {
     'plugin.video.catchuptvandmore': 'Catch-up TV & More',
     'script.module.codequick': 'CodeQuick',
     'script.module.inputstreamhelper': 'InputStream Helper',
-    'script.module.youtube.dl': 'Youtube-dl'
+    'script.module.youtube.dl': 'Youtube-dl',
+    'inputstream.adaptive': 'inputstream.adaptive'
 }
 
 
@@ -37,21 +40,24 @@ ADDONS_PATHS = {
     'plugin.video.catchuptvandmore': Config.get('addon_path'),
     'script.module.codequick': Config.get('codequick_addon_path'),
     'script.module.inputstreamhelper': Config.get('inputstreamhelper_addon_path'),
-    'script.module.youtube.dl': Config.get('youtubedl_addon_path')
+    'script.module.youtube.dl': Config.get('youtubedl_addon_path'),
+    'inputstream.adaptive': Config.get('addon_path')
 }
 
 ADDONS_FANARTS = {
     'plugin.video.catchuptvandmore': Config.get('addon_fanart_filepath'),
     'script.module.codequick': Config.get('codequick_fanart_filepath'),
     'script.module.inputstreamhelper': Config.get('inputstreamhelper_fanart_filepath'),
-    'script.module.youtube.dl': Config.get('youtubedl_fanart_filepath')
+    'script.module.youtube.dl': Config.get('youtubedl_fanart_filepath'),
+    'inputstream.adaptive': Config.get('addon_fanart_filepath')
 }
 
 ADDONS_ICONS = {
     'plugin.video.catchuptvandmore': Config.get('addon_icon_filepath'),
     'script.module.codequick': Config.get('codequick_icon_filepath'),
     'script.module.inputstreamhelper': Config.get('inputstreamhelper_icon_filepath'),
-    'script.module.youtube.dl': Config.get('youtubedl_icon_filepath')
+    'script.module.youtube.dl': Config.get('youtubedl_icon_filepath'),
+    'inputstream.adaptive': Config.get('addon_icon_filepath')
 }
 
 
@@ -94,6 +100,13 @@ class Addon(object):
             exit(-1)
         log.debug('getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
         return self._settings.get(setting_id, '')
+
+    def getSettingBool(self, setting_id):
+        if setting_id not in self._settings:
+            log.error('Missing setting_id "{}" in {} settings (config.py)'.format(setting_id, self._id))
+            exit(-1)
+        log.debug('getSetting of "{}" --> "{}"'.format(setting_id, self._settings.get(setting_id)))
+        return self._settings.get(bool(setting_id), '')
 
     def setSetting(self, _id, value):
         log.debug('setSetting of "{}" --> "{}"'.format(_id, value))

@@ -5,7 +5,9 @@ import sys
 class Window(object):
     def __init__(self, existingWindowId=-1):
         # type: (int) -> None
-        self.dict = {}
+        self.dict = {
+            'cutv_labels__labels': None
+        }
 
     def setProperty(self, key, value):
         self.dict[key] = value
@@ -140,6 +142,11 @@ class DialogProgress(object):
     
     def iscanceled(self):
         return True
+
+
+class DialogProgressBG(object):
+    def __init__(self):
+        pass
 
 
 # INT_MAX = sys.maxint

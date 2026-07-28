@@ -100,7 +100,7 @@ The information below use the CLI format but you can easily find the correspondi
 * **--auto-exploration**:
   * Enable the auto exploration mode of the simulator
 
-* **--entry-points STRING**:
+* **--entry-point STRING**:
   * By default the auto exploration starts from the root menu but you can specify one or more entry points of the addon to start the auto exploration (e.g. 1, 1-2-1, 1-3-4-1)
 
 * **--max-items-per-menu INT**:
