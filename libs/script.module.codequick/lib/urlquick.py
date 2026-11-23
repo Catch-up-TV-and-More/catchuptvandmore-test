@@ -62,6 +62,7 @@ from htmlement import HTMLement
 from requests.structures import CaseInsensitiveDict
 from requests.adapters import HTTPResponse
 from requests import adapters
+from requests import sessions 
 from requests import *
 import requests
 
