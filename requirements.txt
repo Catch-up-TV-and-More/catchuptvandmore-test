@@ -7,5 +7,5 @@ youtube_dl
 pytz
 six
 pycryptodome
-backports-zoneinfo
+backports-zoneinfo; python_version < "3.9"
 tzdata
