@@ -2,7 +2,7 @@ git+https://github.com/willforde/urlquick.git
 polib
 htmlement
 colorama
-requests
+requests<2.34
 youtube_dl
 pytz
 six
